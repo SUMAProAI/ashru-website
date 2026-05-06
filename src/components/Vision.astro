@@ -1,0 +1,70 @@
+---
+---
+<section id="vision" class="py-24">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">The longer arc</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-10 max-w-3xl">
+      Why semantics become<br/>
+      <span class="gradient-text">infrastructure.</span>
+    </h2>
+
+    <div class="prose-content text-lg leading-relaxed muted space-y-6">
+      <p>
+        For thirty years, every infrastructure layer has standardized — except meaning.
+        We standardized <strong class="text-ink-100">documents</strong> with HTTP and XML.
+        We standardized <strong class="text-ink-100">APIs</strong> with REST and JSON.
+        We standardized <strong class="text-ink-100">messages</strong> with Kafka and Protobuf.
+        We standardized <strong class="text-ink-100">files</strong> with cloud object storage.
+        Each standard moved the cost of integration from N × M down to N + M, and the entire
+        software industry compounded on top of it.
+      </p>
+
+      <p>
+        Semantics never standardized. Every team that builds an LLM pipeline invents its own
+        JSON schema for what an "extracted fact" looks like — and pays the LLM to render it.
+        At one record, the cost is invisible. At a million records a day, the cost is
+        <strong class="text-ink-100">a tax on every AI company's P&L</strong>, paid in tokens that buy nothing.
+      </p>
+
+      <div class="glass rounded-2xl p-7 my-10 border-l-4" style="border-left-color: var(--color-accent-500);">
+        <p class="text-xl text-ink-100 leading-relaxed font-medium">
+          The next decade of AI will not be limited by compute.<br/>
+          It will be limited by <span class="gradient-text">how efficiently semantics move between systems.</span>
+        </p>
+      </div>
+
+      <p>
+        ASHRU is a small bet on a specific claim: <strong class="text-ink-100">a wire format
+        is the right abstraction layer for AI semantic exchange</strong> — not a framework,
+        not a SaaS, not a vendor lock-in. The format must be open, deterministic, and grammatically
+        grounded so that any LLM, any database, any stream processor, and any agent can produce
+        and consume it without coordination.
+      </p>
+
+      <p>
+        It must be <strong class="text-ink-100">positional, not keyed</strong> — so the schema
+        lives in the spec, not in every payload. It must be <strong class="text-ink-100">grammatically
+        complete</strong> — so the same fact can be retrieved by who, by what, by where, by when.
+        It must be <strong class="text-ink-100">human-readable</strong> — so debugging happens
+        without a decoder. And it must be <strong class="text-ink-100">free</strong> — public domain,
+        no patents, no rent.
+      </p>
+
+      <p>
+        Pāṇini wrote down those grammatical primitives in the 5th century BCE. NASA's Rick Briggs
+        wrote in 1985 that those primitives map directly onto AI knowledge representation. ASHRU
+        is a 21st-century wire format for an observation about meaning that has been right for 2,500 years.
+        The window for it to become an infrastructure layer is now —
+        <strong class="text-ink-100">because the LLMs that will define the next decade are being built right now</strong>,
+        and they all need to talk to each other, and to your knowledge graph, and to the same agent two weeks from now.
+      </p>
+
+      <p class="text-base muted">
+        We don't know which AI infrastructure standards will compound for the next thirty years.
+        We do know that some of them will. <strong class="text-ink-100">A semantic transport layer
+        is one of the empty slots</strong> — and ASHRU is the most defensible candidate, because
+        it claims nothing more than what humanity already proved 2,500 years ago.
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,81 @@
+---
+---
+<section id="architecture" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Where ASHRU sits in your stack</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-12 max-w-4xl">
+      The semantic transport layer<br/>
+      <span class="gradient-text">between LLMs and your knowledge graph.</span>
+    </h2>
+
+    <!-- Pipeline diagram -->
+    <div class="glass-strong rounded-2xl p-6 md:p-10 mb-6 overflow-x-auto">
+      <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-6 text-center">Knowledge graph extraction pipeline</div>
+      <div class="flex items-center justify-between gap-2 min-w-[800px]">
+        <!-- LLM -->
+        <div class="flex flex-col items-center text-center flex-1">
+          <div class="w-24 h-24 rounded-2xl border-2 border-flame-500/40 bg-flame-500/5 flex items-center justify-center mb-3">
+            <div class="font-mono text-xs text-flame-300 leading-tight">Gemini<br/>OpenAI<br/>Claude</div>
+          </div>
+          <div class="text-sm font-semibold text-ink-100">LLM</div>
+          <div class="text-xs muted mt-1">prose in</div>
+        </div>
+        <div class="flex-shrink-0 text-accent-300 font-mono text-2xl">→</div>
+        <!-- ASHRU -->
+        <div class="flex flex-col items-center text-center flex-1">
+          <div class="w-24 h-24 rounded-2xl border-2 border-accent-500/60 bg-accent-500/10 flex items-center justify-center mb-3 relative">
+            <div class="absolute inset-0 rounded-2xl bg-accent-500/10 animate-pulse"></div>
+            <div class="font-mono text-xs gradient-text font-bold leading-tight relative">ASHRU<br/>v1</div>
+          </div>
+          <div class="text-sm font-semibold text-ink-100">Wire format</div>
+          <div class="text-xs muted mt-1">V|verb|...</div>
+        </div>
+        <div class="flex-shrink-0 text-accent-300 font-mono text-2xl">→</div>
+        <!-- Stream/Bus -->
+        <div class="flex flex-col items-center text-center flex-1">
+          <div class="w-24 h-24 rounded-2xl border-2 border-mint-500/40 bg-mint-500/5 flex items-center justify-center mb-3">
+            <div class="font-mono text-xs text-mint-400 leading-tight">Kafka<br/>Kinesis<br/>Pub/Sub</div>
+          </div>
+          <div class="text-sm font-semibold text-ink-100">Stream</div>
+          <div class="text-xs muted mt-1">batch transport</div>
+        </div>
+        <div class="flex-shrink-0 text-accent-300 font-mono text-2xl">→</div>
+        <!-- KG / DB -->
+        <div class="flex flex-col items-center text-center flex-1">
+          <div class="w-24 h-24 rounded-2xl border-2 border-mint-500/40 bg-mint-500/5 flex items-center justify-center mb-3">
+            <div class="font-mono text-xs text-mint-400 leading-tight">Neo4j<br/>Postgres<br/>+ pgvector</div>
+          </div>
+          <div class="text-sm font-semibold text-ink-100">Knowledge graph</div>
+          <div class="text-xs muted mt-1">structured store</div>
+        </div>
+        <div class="flex-shrink-0 text-accent-300 font-mono text-2xl">→</div>
+        <!-- Agents -->
+        <div class="flex flex-col items-center text-center flex-1">
+          <div class="w-24 h-24 rounded-2xl border-2 border-flame-500/40 bg-flame-500/5 flex items-center justify-center mb-3">
+            <div class="font-mono text-xs text-flame-300 leading-tight">Agents<br/>RAG<br/>UI</div>
+          </div>
+          <div class="text-sm font-semibold text-ink-100">Consumer</div>
+          <div class="text-xs muted mt-1">retrieval</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="glass rounded-xl p-5">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">📡 Semantic streaming</div>
+        <div class="text-sm font-semibold text-ink-100 mb-2">Multi-agent communication</div>
+        <p class="text-xs muted leading-relaxed">Agents emit ASHRU rows on a shared Kafka topic. Each row is a typed semantic event. Consumers subscribe by verb_lemma, kartā, or sphere — no schema negotiation, no JSON-Schema coordination overhead.</p>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">🧠 Agent memory infrastructure</div>
+        <div class="text-sm font-semibold text-ink-100 mb-2">Long-term memory store</div>
+        <p class="text-xs muted leading-relaxed">Each ASHRU row → one row in Postgres + pgvector embedding. Retrieval = cosine similarity × harmonic weight × tense decay. Pay once at write, read forever for free. No per-query LLM cost.</p>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">🔭 AI observability</div>
+        <div class="text-sm font-semibold text-ink-100 mb-2">Semantic telemetry</div>
+        <p class="text-xs muted leading-relaxed">ASHRU is a typed schema for LLM behavior. Log every kartā/karma/verb tuple your agent emits. You get structured drift detection, anomaly surfacing, and replayable semantic traces — without invented schemas.</p>
+      </div>
+    </div>
+  </div>
+</section>

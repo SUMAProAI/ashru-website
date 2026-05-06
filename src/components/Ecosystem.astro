@@ -1,0 +1,91 @@
+---
+const integrations = [
+  {
+    name: 'LangChain',
+    tagline: 'Drop-in output parser',
+    description: 'Replace Pydantic-JSON output stage with AshruOutputParser. Same chain, ~4× fewer output tokens.',
+    code: `from langchain_core.output_parsers import BaseOutputParser
+from ashru import parse
+
+class AshruOutputParser(BaseOutputParser):
+    def parse(self, text):
+        return parse(text).verbs
+
+chain = ASHRU_PROMPT | llm | AshruOutputParser()`,
+    color: 'mint',
+  },
+  {
+    name: 'OpenAI / Claude / Gemini',
+    tagline: 'Bring your own LLM',
+    description: 'One prompt instruction. Replace JSON-output schema with the ASHRU/1 column convention. Works on every major LLM.',
+    code: `# extract_batch.py — pipe prose in, ASHRU out
+cat my_paragraphs.txt | python extract_batch.py \\
+    --provider gemini \\
+    --model gemini-2.5-flash-lite
+
+# → ASHRU/1
+# → V|buy|Suman|Tesla|$60000||John|SF|p|0|
+# → ... (one V| per fact)`,
+    color: 'accent',
+  },
+  {
+    name: 'Neo4j / Postgres / pgvector',
+    tagline: 'Direct ingest',
+    description: 'Each ASHRU row maps to one row in your knowledge graph. No transform layer. No schema migration.',
+    code: `# Each ASHRU verb → one INSERT.
+# kartā → :Subject, karma → :Object,
+# verb_lemma → :REL_TYPE, attributes → JSON properties.
+
+CREATE (s:Entity {name: $karta})
+CREATE (o:Entity {name: $karma})
+CREATE (s)-[r:RELATES {verb: $verb, tense: $tense, ...}]->(o)`,
+    color: 'flame',
+  },
+  {
+    name: 'Kafka / Kinesis / Pub/Sub',
+    tagline: 'Semantic streaming',
+    description: 'Stream ASHRU rows on a topic. Subscribers filter by verb_lemma or kartā. Multi-agent semantic event bus.',
+    code: `// Producer (any agent emits typed semantic events)
+producer.send('semantic-events',
+  'V|update|order_42|paid|||||p|0|amount=99.00');
+
+// Consumer subscribes by verb_lemma
+consumer.subscribe('semantic-events').filter(
+  row => row.verb_lemma === 'update');`,
+    color: 'mint',
+  },
+];
+const colorClasses = {
+  mint:   { border: 'border-mint-500/30',   bg: 'bg-mint-500/5',   tag: 'text-mint-400'   },
+  accent: { border: 'border-accent-500/30', bg: 'bg-accent-500/5', tag: 'text-accent-300' },
+  flame:  { border: 'border-flame-500/30',  bg: 'bg-flame-500/5',  tag: 'text-flame-300'  },
+};
+---
+<section id="ecosystem" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Already in your stack</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5 max-w-4xl">
+      Drops in next to <span class="gradient-text">every tool you already use.</span>
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
+      ASHRU is a wire format, not a framework. It coexists with LangChain, the vendor SDKs, your message bus, your graph database. Change one line of your prompt's output instruction. Replace JSON.parse with ashru.parse. That's it.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      {integrations.map(i => (
+        <div class={`rounded-2xl p-6 ${colorClasses[i.color].border} ${colorClasses[i.color].bg} border`}>
+          <div class={`text-xs uppercase tracking-[0.15em] font-semibold mb-2 ${colorClasses[i.color].tag}`}>{i.tagline}</div>
+          <h3 class="text-xl font-bold text-ink-100 mb-2">{i.name}</h3>
+          <p class="text-sm muted leading-relaxed mb-5">{i.description}</p>
+          <pre class="code-block !text-[0.72rem] !leading-relaxed overflow-x-auto"><code>{i.code}</code></pre>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 text-center">
+      <a href="https://github.com/ashru-format/ashru-format/tree/main/examples" class="inline-flex items-center gap-2 text-accent-300 hover:text-accent-500 font-semibold text-sm">
+        Browse all integration examples →
+      </a>
+    </div>
+  </div>
+</section>

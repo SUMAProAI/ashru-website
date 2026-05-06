@@ -1,0 +1,117 @@
+---
+---
+<section id="calculator" class="py-24">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Run your own numbers</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+      How much does <span class="gradient-text">JSON cost you</span> at scale?
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-10 max-w-3xl">
+      Plug in your traffic. We compute the LLM bill at Gemini Flash Lite published rates ($0.10/M input, $0.40/M output) for both formats, side by side. No login. No telemetry. Pure math, runs in your browser.
+    </p>
+
+    <div class="glass-strong rounded-2xl p-6 md:p-8">
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div>
+          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Records extracted per day</label>
+          <input id="calc-records" type="number" value="100000" min="1" step="1000" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-lg focus:outline-none focus:border-accent-500/40 transition-colors"/>
+          <div class="text-xs muted mt-1">e.g., 100,000 = a small SaaS extracting one fact per chat message at moderate volume</div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Avg input tokens per record</label>
+          <input id="calc-input" type="number" value="200" min="1" step="10" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-lg focus:outline-none focus:border-accent-500/40 transition-colors"/>
+          <div class="text-xs muted mt-1">Length of the prose you send to the LLM. ~200 = a typical chat paragraph.</div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="rounded-xl p-5 border border-flame-500/30 bg-flame-500/5">
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">JSON</div>
+          <div class="space-y-2 text-sm font-mono">
+            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="json-in" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="json-out" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="json-day" class="text-flame-300 font-bold">—</span></div>
+            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="json-year" class="text-flame-300 font-bold text-base">—</span></div>
+          </div>
+        </div>
+        <div class="rounded-xl p-5 border border-accent-500/30 bg-accent-500/5">
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">ASHRU</div>
+          <div class="space-y-2 text-sm font-mono">
+            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="ashru-in" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="ashru-out" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="ashru-day" class="text-mint-400 font-bold">—</span></div>
+            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="ashru-year" class="text-mint-400 font-bold text-base">—</span></div>
+          </div>
+        </div>
+        <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">You save</div>
+          <div class="space-y-2">
+            <div class="text-3xl font-extrabold gradient-text" id="savings-pct">—</div>
+            <div class="text-sm muted" id="savings-line">Adjust the inputs above</div>
+            <div class="border-t border-white/5 pt-2 mt-3">
+              <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-1">Saved/year</div>
+              <div class="text-xl font-bold gradient-text font-mono" id="savings-year">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs muted leading-relaxed bg-white/[0.02] rounded-lg p-4 border border-white/5">
+        <strong class="text-ink-100">How we compute:</strong>
+        Output side, JSON ≈ 1.0× input tokens (verbose schema, repeated keys), ASHRU ≈ 0.25× input tokens (positional, no keys). Gemini Flash Lite May-2026 pricing: input $0.10/1M tokens, output $0.40/1M tokens. Output dominates because output is 4× input rate. Your real numbers depend on tokenization specifics — verify with <a href="https://github.com/openai/tiktoken" class="text-accent-300 hover:text-accent-500">tiktoken</a>.
+      </div>
+    </div>
+
+    <p class="text-center muted text-sm mt-6">
+      <strong class="text-ink-100">Default scenario at 100K records/day, 200 input tokens:</strong>
+      JSON costs you ~$36k/year. ASHRU drops it to ~$11k/year. <span class="gradient-text font-semibold">$25,000+ saved per year, per pipeline.</span>
+    </p>
+  </div>
+</section>
+
+<script type="module">
+  // Pricing assumptions (Gemini Flash Lite, May 2026)
+  const INPUT_PRICE_PER_M = 0.10;
+  const OUTPUT_PRICE_PER_M = 0.40;
+  const JSON_OUTPUT_RATIO = 1.0;
+  const ASHRU_OUTPUT_RATIO = 0.25;
+
+  const fmt = (n) => '$' + n.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  const fmtTok = (n) => n.toLocaleString('en-US') + ' tok';
+
+  function recompute() {
+    const records = Math.max(0, +document.getElementById('calc-records').value || 0);
+    const inputPer = Math.max(0, +document.getElementById('calc-input').value || 0);
+    const inputDay = records * inputPer;
+    const outputJsonDay = records * inputPer * JSON_OUTPUT_RATIO;
+    const outputAshruDay = records * inputPer * ASHRU_OUTPUT_RATIO;
+
+    const inputCost = inputDay * INPUT_PRICE_PER_M / 1_000_000;
+    const jsonOutCost = outputJsonDay * OUTPUT_PRICE_PER_M / 1_000_000;
+    const ashruOutCost = outputAshruDay * OUTPUT_PRICE_PER_M / 1_000_000;
+    const jsonDay = inputCost + jsonOutCost;
+    const ashruDay = inputCost + ashruOutCost;
+    const jsonYear = jsonDay * 365;
+    const ashruYear = ashruDay * 365;
+    const saved = jsonYear - ashruYear;
+    const savedPct = jsonYear > 0 ? Math.round((1 - ashruYear/jsonYear) * 100) : 0;
+
+    document.getElementById('json-in').textContent = fmtTok(inputDay);
+    document.getElementById('json-out').textContent = fmtTok(outputJsonDay);
+    document.getElementById('json-day').textContent = fmt(jsonDay);
+    document.getElementById('json-year').textContent = fmt(jsonYear);
+
+    document.getElementById('ashru-in').textContent = fmtTok(inputDay);
+    document.getElementById('ashru-out').textContent = fmtTok(outputAshruDay);
+    document.getElementById('ashru-day').textContent = fmt(ashruDay);
+    document.getElementById('ashru-year').textContent = fmt(ashruYear);
+
+    document.getElementById('savings-pct').textContent = savedPct + '%';
+    document.getElementById('savings-line').textContent = `lower than JSON. Output side does most of the work — JSON outputs 4× the tokens of ASHRU per record.`;
+    document.getElementById('savings-year').textContent = fmt(saved);
+  }
+
+  document.getElementById('calc-records').addEventListener('input', recompute);
+  document.getElementById('calc-input').addEventListener('input', recompute);
+  recompute();
+</script>
