@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b48eff"/>
+      <stop offset="100%" stop-color="#ff7eb6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background tile -->
+  <rect width="64" height="64" rx="14" fill="#0a0a14"/>
+  <!-- Three pipes — the visual signature of ASHRU's pipe-delimited format -->
+  <rect x="14" y="12" width="3" height="40" rx="1.5" fill="url(#g)"/>
+  <rect x="30.5" y="12" width="3" height="40" rx="1.5" fill="url(#g)"/>
+  <rect x="47" y="12" width="3" height="40" rx="1.5" fill="url(#g)"/>
+  <!-- Three small horizontal "verb" marks between the pipes -->
+  <rect x="19" y="30" width="9" height="2" rx="1" fill="#e6e6f0" opacity="0.85"/>
+  <rect x="35" y="30" width="9" height="2" rx="1" fill="#e6e6f0" opacity="0.55"/>
+</svg>

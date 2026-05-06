@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASHRU — A pipe-delimited LLM extraction format. 80% fewer tokens than JSON.</title>
+    <meta name="description" content="ASHRU (Atomic Semantic Hyper-Relational Unit) is an open, pipe-delimited extraction format for LLM knowledge graphs. Drops output token cost by 60–80% vs JSON. Public domain spec, MIT parsers in Python and JavaScript.">
+    <meta name="keywords" content="ASHRU, LLM, JSON, extraction format, knowledge graph, kāraka, Pāṇini, token optimization, Gemini, Claude, GPT, structured output">
+    <meta property="og:title" content="ASHRU — Stop paying LLMs for punctuation.">
+    <meta property="og:description" content="A pipe-delimited LLM extraction format. 80% fewer output tokens than JSON. Open, public domain.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ashru.dev">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ASHRU — Stop paying LLMs for punctuation.">
+    <meta name="twitter:description" content="A pipe-delimited LLM extraction format. 80% fewer output tokens than JSON.">
+    <link rel="canonical" href="https://ashru.dev">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">ASHRU<span>.dev</span></div>
+        <div class="nav-links">
+            <a href="#spec">Specification</a>
+            <a href="#philosophy">Philosophy</a>
+            <a href="converter.html">Converter</a>
+            <a href="https://github.com/ashru-format/ashru-format" class="btn btn-outline">GitHub</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <div class="hero-badge">v1.0 · CC0 Public Domain · MIT Parsers</div>
+            <h1 class="hero-title">Stop paying LLMs<br>for <span class="gradient-text">punctuation.</span></h1>
+            <p class="hero-subtitle">
+                ASHRU (Atomic Semantic Hyper-Relational Unit) is a pipe-delimited extraction protocol for LLM knowledge graphs. It replaces bloated JSON extraction and saves you up to <strong>80% on output token costs</strong>.
+            </p>
+            <div class="hero-cta">
+                <a href="#spec" class="btn btn-primary">Read the Spec</a>
+                <a href="converter.html" class="btn btn-secondary">Try the Converter →</a>
+            </div>
+            <div class="stats-strip">
+                <div class="stat"><div class="stat-num">4.8×</div><div class="stat-lbl">smaller than JSON</div></div>
+                <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">runtime dependencies</div></div>
+                <div class="stat"><div class="stat-num">2,500</div><div class="stat-lbl">years old (Pāṇini)</div></div>
+                <div class="stat"><div class="stat-num">19/19</div><div class="stat-lbl">tests passing</div></div>
+            </div>
+            
+            <div class="terminal-mock">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">ASHRU vs JSON Extraction</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="code-compare">
+                        <div class="code-block bad">
+                            <span class="comment">// 120 Tokens (Legacy JSON)</span>
+                            <pre><code>{
+  "verbs": [
+    {
+      "verb_lemma": "buy",
+      "kartā": "Suman",
+      "karma": "Tesla",
+      "karaṇa": "$60,000"
+    }
+  ]
+}</code></pre>
+                        </div>
+                        <div class="code-block good">
+                            <span class="comment">// 25 Tokens (ASHRU v1)</span>
+                            <pre><code>ASHRU/1
+V|buy|Suman|Tesla|$60,000||||p|0|</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="philosophy" class="philosophy">
+        <div class="container">
+            <h2 class="section-title">The "Sphere of Spheres" Philosophy</h2>
+            <p class="section-desc">Data isn't physical. It's spiritual. It's a graph.</p>
+            
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon">⚛️</div>
+                    <h3>Atomic Meaning</h3>
+                    <p>The smallest unit of meaning isn't a string or an integer. It is an action (a verb) and its arguments (kārakas). ASHRU distills knowledge down to this absolute atomic truth.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌌</div>
+                    <h3>Omnipresent Spheres</h3>
+                    <p>Stop forcing data into rigid folder hierarchies. In the ASHRU model, a concept is a <strong>Sphere</strong>. A Sphere can link to multiple other Spheres simultaneously, acting as a true Many-to-Many knowledge graph.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚡️</div>
+                    <h3>Substrate Independent</h3>
+                    <p>Whether you are mapping a 500-line Java file, a movie script, or human chat history, ASHRU represents the actions in a single, universal topological format.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="spec" class="spec">
+        <div class="container">
+            <h2 class="section-title">The ASHRU Specification (v1)</h2>
+            <div class="spec-container">
+                <p>Every response starts with a version header, followed by line-typed records.</p>
+                <pre class="spec-code"><code>ASHRU/1
+F|&lt;file_path&gt;          # optional: file marker (bulk ingestion)
+S|&lt;sphere_path&gt;        # optional: sphere marker (multi-routing)
+V|&lt;verb columns 1-10&gt;  # the verb itself, 10 pipe-separated columns</code></pre>
+                
+                <h3>The 10 Columns of an ASHRU Verb (V|...)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Column</th>
+                                <th>Description</th>
+                                <th>Required?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>verb_lemma</td><td>Atomic action (e.g., buy, deploy)</td><td>Yes</td></tr>
+                            <tr><td>2</td><td>kartā</td><td>Agent / Subject</td><td>Optional</td></tr>
+                            <tr><td>3</td><td>karma</td><td>Object</td><td>Optional</td></tr>
+                            <tr><td>4</td><td>karaṇa</td><td>Instrument / Tool</td><td>Optional</td></tr>
+                            <tr><td>5</td><td>sampradāna</td><td>Recipient</td><td>Optional</td></tr>
+                            <tr><td>6</td><td>apādāna</td><td>Source / Origin</td><td>Optional</td></tr>
+                            <tr><td>7</td><td>adhikaraṇa</td><td>Locative / Where/When</td><td>Optional</td></tr>
+                            <tr><td>8</td><td>tense</td><td>p (past), n (now), f (future), c (conditional)</td><td>Optional</td></tr>
+                            <tr><td>9</td><td>is_negated</td><td>0 or 1 (false/true)</td><td>Default 0</td></tr>
+                            <tr><td>10</td><td>attributes</td><td>k=v;k=v (semicolon-separated)</td><td>Optional</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>ASHRU is an open community standard. Spec released under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0 1.0 (public domain)</a>. Reference parsers under <a href="https://github.com/ashru-format/ashru-format/blob/main/LICENSE">MIT</a>.</p>
+            <p class="footer-sub"><em>Named in honor of <strong>Ashrith</strong>. In Sanskrit, अश्रु ("ashru") is the distilled essence — a tear that holds the whole.</em></p>
+            <p class="footer-sub"><a href="https://github.com/ashru-format/ashru-format">GitHub</a> · <a href="converter.html">Live Converter</a> · <a href="#spec">Specification</a></p>
+        </div>
+    </footer>
+</body>
+</html>
