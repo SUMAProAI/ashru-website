@@ -28,29 +28,29 @@
         <div class="rounded-xl p-5 border border-flame-500/30 bg-flame-500/5">
           <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">JSON</div>
           <div class="space-y-2 text-sm font-mono">
-            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="json-in" class="text-ink-100">—</span></div>
-            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="json-out" class="text-ink-100">—</span></div>
-            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="json-day" class="text-flame-300 font-bold">—</span></div>
-            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="json-year" class="text-flame-300 font-bold text-base">—</span></div>
+            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="calc-json-in" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="calc-json-out" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="calc-json-day" class="text-flame-300 font-bold">—</span></div>
+            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="calc-json-year" class="text-flame-300 font-bold text-base">—</span></div>
           </div>
         </div>
         <div class="rounded-xl p-5 border border-accent-500/30 bg-accent-500/5">
           <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">ASHRU</div>
           <div class="space-y-2 text-sm font-mono">
-            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="ashru-in" class="text-ink-100">—</span></div>
-            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="ashru-out" class="text-ink-100">—</span></div>
-            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="ashru-day" class="text-mint-400 font-bold">—</span></div>
-            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="ashru-year" class="text-mint-400 font-bold text-base">—</span></div>
+            <div class="flex justify-between"><span class="muted">Input/day:</span><span id="calc-ashru-in" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Output/day:</span><span id="calc-ashru-out" class="text-ink-100">—</span></div>
+            <div class="flex justify-between"><span class="muted">Cost/day:</span><span id="calc-ashru-day" class="text-mint-400 font-bold">—</span></div>
+            <div class="flex justify-between border-t border-white/5 pt-2 mt-2"><span class="muted">Cost/year:</span><span id="calc-ashru-year" class="text-mint-400 font-bold text-base">—</span></div>
           </div>
         </div>
         <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
           <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">You save</div>
           <div class="space-y-2">
-            <div class="text-3xl font-extrabold gradient-text" id="savings-pct">—</div>
-            <div class="text-sm muted" id="savings-line">Adjust the inputs above</div>
+            <div class="text-3xl font-extrabold gradient-text" id="calc-savings-pct">—</div>
+            <div class="text-sm muted" id="calc-savings-line">Adjust the inputs above</div>
             <div class="border-t border-white/5 pt-2 mt-3">
               <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-1">Saved/year</div>
-              <div class="text-xl font-bold gradient-text font-mono" id="savings-year">—</div>
+              <div class="text-xl font-bold gradient-text font-mono" id="calc-savings-year">—</div>
             </div>
           </div>
         </div>
@@ -96,19 +96,19 @@
     const saved = jsonYear - ashruYear;
     const savedPct = jsonYear > 0 ? Math.round((1 - ashruYear/jsonYear) * 100) : 0;
 
-    document.getElementById('json-in').textContent = fmtTok(inputDay);
-    document.getElementById('json-out').textContent = fmtTok(outputJsonDay);
-    document.getElementById('json-day').textContent = fmt(jsonDay);
-    document.getElementById('json-year').textContent = fmt(jsonYear);
+    document.getElementById('calc-json-in').textContent = fmtTok(inputDay);
+    document.getElementById('calc-json-out').textContent = fmtTok(outputJsonDay);
+    document.getElementById('calc-json-day').textContent = fmt(jsonDay);
+    document.getElementById('calc-json-year').textContent = fmt(jsonYear);
 
-    document.getElementById('ashru-in').textContent = fmtTok(inputDay);
-    document.getElementById('ashru-out').textContent = fmtTok(outputAshruDay);
-    document.getElementById('ashru-day').textContent = fmt(ashruDay);
-    document.getElementById('ashru-year').textContent = fmt(ashruYear);
+    document.getElementById('calc-ashru-in').textContent = fmtTok(inputDay);
+    document.getElementById('calc-ashru-out').textContent = fmtTok(outputAshruDay);
+    document.getElementById('calc-ashru-day').textContent = fmt(ashruDay);
+    document.getElementById('calc-ashru-year').textContent = fmt(ashruYear);
 
-    document.getElementById('savings-pct').textContent = savedPct + '%';
-    document.getElementById('savings-line').textContent = `lower than JSON. Output side does most of the work — JSON outputs 4× the tokens of ASHRU per record.`;
-    document.getElementById('savings-year').textContent = fmt(saved);
+    document.getElementById('calc-savings-pct').textContent = savedPct + '%';
+    document.getElementById('calc-savings-line').textContent = `lower than JSON. Output side does most of the work — JSON outputs 4× the tokens of ASHRU per record.`;
+    document.getElementById('calc-savings-year').textContent = fmt(saved);
   }
 
   document.getElementById('calc-records').addEventListener('input', recompute);

@@ -29,8 +29,12 @@ const faqs = [
     a: "Pāṇini formalized the six kāraka case roles in the Aṣṭādhyāyī around the 5th century BCE. It's been public domain by virtue of being humanity's gift for ~2,500 years. We didn't invent any of this — we brought one of its oldest grammatical observations to a 2026 wire format. There is no IP claim on Sanskrit grammar."
   },
   {
+    q: "Does ASHRU work with Pydantic / OpenAI Structured Outputs / native JSON-Schema validation?",
+    a: "No — and this is the most important trade-off to understand before adopting. When you switch from JSON to ASHRU output, you give up native JSON-Schema validation (Pydantic, OpenAI Structured Outputs, Anthropic's tool-use schema, Gemini's response_schema). If the LLM emits a malformed pipe row, you don't get the framework's automatic retry. You handle validation at your application layer — the reference parser is tolerant by design (skips bad rows, logs warnings), but strict shape enforcement is your responsibility. ASHRU is an architectural trade-off: you sacrifice native validation libraries in exchange for ~80% output-token cost reduction at scale. For most extraction-heavy LLM pipelines that trade is worth it. For mission-critical single-record outputs where every field must be schema-checked, stay on JSON."
+  },
+  {
     q: "What's the catch?",
-    a: "Two real ones: (1) You lose Pydantic-style strict validation on the output shape — ASHRU's tolerance is by design, but it means you have to validate kāraka contents at the application layer if your downstream code is strict. (2) ASHRU is optimized for kāraka-shaped data (subject-verb-object-with-modifiers). For free-form text or unstructured key-value bags, JSON is still the right tool."
+    a: "Two real ones: (1) The Pydantic / Structured-Output trade-off above — you do extra validation work in exchange for token savings. (2) ASHRU is optimized for kāraka-shaped data (subject-verb-object-with-modifiers). For free-form text or unstructured key-value bags, JSON is still the right tool."
   },
 ];
 ---
