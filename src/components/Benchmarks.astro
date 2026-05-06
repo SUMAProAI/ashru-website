@@ -1,0 +1,116 @@
+---
+// Real numbers from `python benchmarks/run_benchmark.py --records 1000`
+// in the ashru-format repo — tokenizer: tiktoken cl100k_base.
+//
+// To regenerate:
+//   git clone github.com/ashru-format/ashru-format
+//   cd ashru-format && pip install tiktoken
+//   python benchmarks/run_benchmark.py --records 1000
+//
+const benchmark = {
+  records: 1000,
+  json_tokens: 71629,
+  ashru_tokens: 21005,
+  json_bytes: 169886,
+  ashru_bytes: 45882,
+  tokenizer: 'tiktoken cl100k_base',
+};
+
+const tokensPerRecord = {
+  json: benchmark.json_tokens / benchmark.records,
+  ashru: benchmark.ashru_tokens / benchmark.records,
+};
+const ratio = benchmark.ashru_tokens / benchmark.json_tokens;
+const reductionPct = Math.round((1 - ratio) * 100);
+
+// Cost per 1M records on output side, May 2026 published rates.
+const models = [
+  { name: 'Gemini Flash Lite', json: 28.65,    ashru: 8.40,    out: 0.40 },
+  { name: 'Gemini Flash',      json: 179.07,   ashru: 52.51,   out: 2.50 },
+  { name: 'GPT-4o-mini',       json: 42.98,    ashru: 12.60,   out: 0.60 },
+  { name: 'GPT-4o',            json: 716.29,   ashru: 210.05,  out: 10.00 },
+  { name: 'Claude Haiku 4.5',  json: 358.14,   ashru: 105.02,  out: 5.00 },
+  { name: 'Claude Sonnet 4.6', json: 1074.43,  ashru: 315.07,  out: 15.00 },
+];
+const fmt = (n: number) => '$' + n.toLocaleString('en-US', {maximumFractionDigits: 0});
+const maxCost = Math.max(...models.map(m => m.json));
+---
+<section id="benchmarks" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Real numbers, not marketing</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5 max-w-4xl">
+      Tokens, measured. Costs, <span class="gradient-text">computed.</span>
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-10 max-w-3xl">
+      Bench script lives in the repo. Tokenizer is real (<code class="text-accent-300 bg-black/40 px-2 py-0.5 rounded text-xs font-mono">{benchmark.tokenizer}</code>). 1,000 kāraka facts encoded in JSON and ASHRU. Numbers below are reproducible.
+    </p>
+
+    <!-- Big SVG bar chart: tokens per record -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8 mb-4">
+      <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-4">Tokens per record (lower is cheaper)</div>
+      <svg viewBox="0 0 720 220" class="w-full" role="img" aria-label="Tokens per record: JSON 71.6, ASHRU 21.0">
+        <defs>
+          <linearGradient id="bg-json" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#fda4af" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.85"/>
+          </linearGradient>
+          <linearGradient id="bg-ashru" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#b8a4ff" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#34d399" stop-opacity="0.95"/>
+          </linearGradient>
+        </defs>
+        <!-- JSON bar -->
+        <text x="20" y="60" fill="#94a3b8" font-family="ui-monospace, monospace" font-size="14">JSON</text>
+        <rect x="100" y="42" width={Math.round((tokensPerRecord.json/100)*560)} height="32" rx="6" fill="url(#bg-json)"/>
+        <text x={100 + Math.round((tokensPerRecord.json/100)*560) + 12} y="65" fill="#fda4af" font-family="ui-monospace, monospace" font-size="18" font-weight="700">{tokensPerRecord.json.toFixed(1)} tok</text>
+        <!-- ASHRU bar -->
+        <text x="20" y="130" fill="#94a3b8" font-family="ui-monospace, monospace" font-size="14">ASHRU</text>
+        <rect x="100" y="112" width={Math.round((tokensPerRecord.ashru/100)*560)} height="32" rx="6" fill="url(#bg-ashru)"/>
+        <text x={100 + Math.round((tokensPerRecord.ashru/100)*560) + 12} y="135" fill="#34d399" font-family="ui-monospace, monospace" font-size="18" font-weight="700">{tokensPerRecord.ashru.toFixed(1)} tok</text>
+        <!-- Annotation -->
+        <text x="100" y="190" fill="#cbd5e1" font-family="ui-monospace, monospace" font-size="13">ASHRU emits {(ratio*100).toFixed(0)}% of JSON's tokens — that's {reductionPct}% fewer. Same fact, same kāraka grammar.</text>
+      </svg>
+    </div>
+
+    <!-- Cost-per-1M chart -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8">
+      <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-4">Output cost per 1,000,000 records (May 2026 rates)</div>
+      <svg viewBox={`0 0 720 ${models.length * 50 + 30}`} class="w-full" role="img" aria-label="Cost per 1M records by model">
+        <defs>
+          <linearGradient id="cost-json" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#fda4af" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.7"/>
+          </linearGradient>
+          <linearGradient id="cost-ashru" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#b8a4ff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#34d399" stop-opacity="0.9"/>
+          </linearGradient>
+        </defs>
+        {models.map((m, i) => {
+          const yJson = i * 50 + 8;
+          const yAshru = i * 50 + 24;
+          const wJson = Math.max(2, (m.json / maxCost) * 380);
+          const wAshru = Math.max(2, (m.ashru / maxCost) * 380);
+          return (
+            <g>
+              <text x="0" y={i * 50 + 28} fill="#cbd5e1" font-family="ui-monospace, monospace" font-size="11">{m.name}</text>
+              <rect x="160" y={yJson} width={wJson} height="14" rx="3" fill="url(#cost-json)"/>
+              <text x={160 + wJson + 6} y={yJson + 11} fill="#fda4af" font-family="ui-monospace, monospace" font-size="10">{fmt(m.json)}</text>
+              <rect x="160" y={yAshru} width={wAshru} height="14" rx="3" fill="url(#cost-ashru)"/>
+              <text x={160 + wAshru + 6} y={yAshru + 11} fill="#34d399" font-family="ui-monospace, monospace" font-size="10">{fmt(m.ashru)}</text>
+            </g>
+          );
+        })}
+      </svg>
+      <div class="flex items-center gap-6 mt-4 text-xs muted font-mono">
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background: linear-gradient(90deg, #fda4af 0%, #f43f5e 100%);"></span>JSON</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background: linear-gradient(90deg, #b8a4ff 0%, #34d399 100%);"></span>ASHRU</span>
+        <span class="ml-auto">Output side only — input cost is identical between formats.</span>
+      </div>
+    </div>
+
+    <div class="text-xs muted leading-relaxed mt-6 bg-white/[0.02] rounded-lg p-4 border border-white/5">
+      <strong class="text-ink-100">Methodology:</strong> 8 sample kāraka facts (Suman/Tesla/Acme/etc.) are repeated to fill {benchmark.records} records. JSON encoding uses pretty-printed UTF-8 with full Devanagari kāraka keys (kartā, karma, karaṇa…). ASHRU uses the v1.0 grammar from <code class="text-accent-300 font-mono">SPEC.md</code>. Tokenizer is OpenAI's <code class="text-accent-300 font-mono">{benchmark.tokenizer}</code>. Pricing reflects published May 2026 list rates; volume discounts not applied. Source code: <a href="https://github.com/ashru-format/ashru-format/blob/main/benchmarks/run_benchmark.py" class="text-accent-300 hover:text-accent-500">benchmarks/run_benchmark.py</a>.
+    </div>
+  </div>
+</section>
