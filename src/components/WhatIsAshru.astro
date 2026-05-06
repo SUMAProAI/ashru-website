@@ -1,0 +1,50 @@
+---
+---
+<section id="format" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-3xl mb-14">
+      <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">The format</div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+        Ten columns. One pipe. Done.
+      </h2>
+      <p class="text-lg muted leading-relaxed">
+        ASHRU is positional, schema-implicit, and tiny. One line per fact.
+        The columns map onto the six grammatical roles every human sentence has
+        had since Pāṇini formalized them — agent, object, instrument, recipient, source, location —
+        plus tense, negation, and a free key-value slot for anything else.
+      </p>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 md:p-8 mb-8 overflow-x-auto">
+      <pre class="text-[0.85rem] leading-relaxed"><code><span class="text-accent-300">V|</span><span class="text-ink-100">verb_lemma</span><span class="text-accent-300">|</span><span class="muted">kartā</span><span class="text-accent-300">|</span><span class="muted">karma</span><span class="text-accent-300">|</span><span class="muted">karaṇa</span><span class="text-accent-300">|</span><span class="muted">sampradāna</span><span class="text-accent-300">|</span><span class="muted">apādāna</span><span class="text-accent-300">|</span><span class="muted">adhikaraṇa</span><span class="text-accent-300">|</span><span class="muted">tense</span><span class="text-accent-300">|</span><span class="muted">negated</span><span class="text-accent-300">|</span><span class="muted">attributes</span></code></pre>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      {[
+        { col: 'verb_lemma', label: 'The action', example: 'buy', meaning: 'Atomic verb in canonical form. Always lowercased.' },
+        { col: 'kartā', label: 'Agent', sanskrit: 'कर्ता', example: 'Suman', meaning: 'Who performed the action.' },
+        { col: 'karma', label: 'Object', sanskrit: 'कर्म', example: 'Tesla', meaning: 'What received the action.' },
+        { col: 'karaṇa', label: 'Instrument', sanskrit: 'करण', example: '$60000', meaning: 'How / by what means.' },
+        { col: 'sampradāna', label: 'Recipient', sanskrit: 'सम्प्रदान', example: 'team_lead', meaning: 'For whose benefit.' },
+        { col: 'apādāna', label: 'Source', sanskrit: 'अपादान', example: 'John', meaning: 'From where / from whom.' },
+        { col: 'adhikaraṇa', label: 'Locative', sanskrit: 'अधिकरण', example: 'SF', meaning: 'Where or when.' },
+        { col: 'tense', label: 'When', example: 'p · n · f · c', meaning: 'past · now · future · conditional.' },
+        { col: 'attributes', label: 'Anything else', example: 'price=60000;currency=USD', meaning: 'k=v pairs separated by ;' },
+      ].map(({ col, label, sanskrit, example, meaning }) => (
+        <div class="glass rounded-xl p-5">
+          <div class="flex items-baseline justify-between mb-2">
+            <code class="text-accent-300 text-sm font-semibold">{col}</code>
+            {sanskrit && <span class="text-xs text-ink-300 font-serif">{sanskrit}</span>}
+          </div>
+          <div class="text-sm font-semibold text-ink-100 mb-2">{label}</div>
+          <div class="text-xs muted leading-relaxed mb-3">{meaning}</div>
+          <code class="text-xs text-mint-400 bg-black/30 px-2 py-1 rounded">{example}</code>
+        </div>
+      ))}
+    </div>
+
+    <p class="text-center muted text-sm mt-10 max-w-2xl mx-auto">
+      Empty between two pipes = empty cell. No quotes. No keys. The schema is in the position.
+    </p>
+  </div>
+</section>

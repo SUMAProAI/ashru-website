@@ -1,0 +1,22 @@
+---
+interface Props { current?: 'home' | 'spec' | 'github' }
+const { current = 'home' } = Astro.props;
+---
+<nav class="sticky top-0 z-50 glass-strong">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-extrabold tracking-tight">
+      json2<span class="gradient-text">ashru</span>
+    </a>
+    <div class="flex items-center gap-6 text-sm">
+      <a href="#format" class="text-ink-300 hover:text-white transition-colors">Format</a>
+      <a href="#math" class="text-ink-300 hover:text-white transition-colors">The Math</a>
+      <a href="#converter" class="text-ink-300 hover:text-white transition-colors">Converter</a>
+      <a
+        href="https://github.com/ashru-format/ashru-format"
+        class="px-3 py-1.5 rounded-md border border-white/10 hover:border-accent-500 hover:bg-white/5 transition-all"
+      >
+        GitHub →
+      </a>
+    </div>
+  </div>
+</nav>

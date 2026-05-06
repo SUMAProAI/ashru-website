@@ -1,0 +1,83 @@
+---
+---
+<section id="dropin" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-3xl mb-14">
+      <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">The change</div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+        Change <span class="gradient-text">one line</span> of your prompt.
+      </h2>
+      <p class="text-lg muted leading-relaxed">
+        You don't migrate to ASHRU. You don't rewrite anything. You change the line of your
+        existing extraction prompt that says <em>"return JSON"</em> to <em>"return ASHRU/1"</em>.
+        The LLM you already pay for emits the new format. Your output bill drops by ~80% the same hour.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="glass rounded-2xl p-5 md:p-6">
+        <div class="flex items-center gap-2 text-xs muted font-semibold mb-4">
+          <span class="size-2 rounded-full bg-flame-500"></span>
+          BEFORE — what most extraction prompts look like
+        </div>
+        <pre class="code-block !text-[0.78rem] leading-relaxed"><code><span class="muted"># in your existing extraction prompt</span>
+prompt = <span class="text-mint-400">"""</span>
+You are an entity extractor. Return JSON in this shape:
+{`{`}
+  "verbs": [
+    {`{`} "verb": "...", "subject": "...", "object": "..." {`}`}
+  ]
+{`}`}
+
+Now extract from: {`{`}text{`}`}
+<span class="text-mint-400">"""</span></code></pre>
+        <div class="mt-4 text-xs muted leading-relaxed">
+          → output is <span class="text-flame-300 font-semibold">120 tokens / record</span>.
+          You pay for every <code>{`{`}</code>, <code>"</code>, and the field name <code>"verb_lemma"</code>
+          repeated 1,000 times.
+        </div>
+      </div>
+
+      <div class="rounded-2xl p-5 md:p-6 glass" style="border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.04);">
+        <div class="flex items-center gap-2 text-xs muted font-semibold mb-4">
+          <span class="size-2 rounded-full bg-mint-500"></span>
+          AFTER — drop-in ASHRU swap
+        </div>
+        <pre class="code-block !text-[0.78rem] leading-relaxed"><code><span class="muted"># the same prompt, ASHRU edition</span>
+prompt = <span class="text-mint-400">"""</span>
+You are an entity extractor. Return ASHRU/1 format —
+one V| line per fact:
+V|verb|kartā|karma|||apādāna|adhikaraṇa|p|0|
+
+Now extract from: {`{`}text{`}`}
+<span class="text-mint-400">"""</span></code></pre>
+        <div class="mt-4 text-xs muted leading-relaxed">
+          → output is <span class="text-mint-400 font-semibold">~25 tokens / record</span>.
+          The schema is in column position. You pay only for actual data.
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 grid md:grid-cols-3 gap-4">
+      <div class="glass rounded-xl p-5 text-center">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Code changed</div>
+        <div class="text-3xl font-extrabold gradient-text">~8 lines</div>
+        <div class="text-xs muted mt-2">just the output schema instruction</div>
+      </div>
+      <div class="glass rounded-xl p-5 text-center">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Output cost cut</div>
+        <div class="text-3xl font-extrabold gradient-text">~80%</div>
+        <div class="text-xs muted mt-2">same fact, same model, ¼ the tokens</div>
+      </div>
+      <div class="glass rounded-xl p-5 text-center">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Migration time</div>
+        <div class="text-3xl font-extrabold gradient-text">5 min</div>
+        <div class="text-xs muted mt-2">edit prompt, replace JSON parser with ashru.parse()</div>
+      </div>
+    </div>
+
+    <p class="text-center muted text-sm mt-10">
+      That's it. No new SDK to learn. No new database. Just a different output schema your LLM already knows how to follow.
+    </p>
+  </div>
+</section>

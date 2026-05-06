@@ -1,0 +1,63 @@
+---
+const faqs = [
+  {
+    q: "Why not just use JSON with structured outputs?",
+    a: "OpenAI/Gemini/Anthropic do cache the schema you send, but you still pay token-by-token for every brace, quote, and field name the model GENERATES. Structured outputs reduce schema-prompt cost; they don't reduce output cost. ASHRU attacks the output cost — typically the more expensive side of LLM billing (Gemini Flash output is 4× input rate)."
+  },
+  {
+    q: "Why not Protobuf or MessagePack?",
+    a: "Both are binary formats. LLMs can't reliably emit raw bytes — they hallucinate magic numbers and offsets. ASHRU is human-readable text that compresses well under byte-pair encoding (BPE), which is what tokenizers actually do."
+  },
+  {
+    q: "Why not YAML?",
+    a: "YAML still requires repetitive keys (\"verb_lemma:\" written 1,000 times in a 1,000-record document). YAML's strength is hand-editing; ASHRU's strength is machine-emission at scale. Different jobs."
+  },
+  {
+    q: "Why not CSV / TSV / NDJSON?",
+    a: "CSV and TSV are flat — no nested file/sphere context (F| and S| markers). NDJSON gives you one JSON object per line, which is fine but still pays the JSON tax per row. ASHRU drops both the row tax (no braces) and supports nesting via the F|/S| context lines."
+  },
+  {
+    q: "What about hallucinated columns / malformed lines?",
+    a: "Reference parsers tolerate them: any V| line with the wrong column count is logged and skipped, not raised. The whole document doesn't crash. This is intentional — LLMs sometimes drift by one column on long outputs, and a strict parser would lose the entire batch."
+  },
+  {
+    q: "Does ASHRU work with my existing extractor (LangChain / LlamaIndex / Instructor / raw API)?",
+    a: "Yes. ASHRU is a wire format — you change one line of your prompt's output instruction, and a few lines of your output parser. The model and the surrounding code stay the same. Drop-in replacement for the JSON output stage."
+  },
+  {
+    q: "Where is the Sanskrit grammar from? Is it copyrighted?",
+    a: "Pāṇini formalized the six kāraka case roles in the Aṣṭādhyāyī around the 5th century BCE. It's been public domain by virtue of being humanity's gift for ~2,500 years. We didn't invent any of this — we brought one of its oldest grammatical observations to a 2026 wire format. There is no IP claim on Sanskrit grammar."
+  },
+  {
+    q: "What's the catch?",
+    a: "Two real ones: (1) You lose Pydantic-style strict validation on the output shape — ASHRU's tolerance is by design, but it means you have to validate kāraka contents at the application layer if your downstream code is strict. (2) ASHRU is optimized for kāraka-shaped data (subject-verb-object-with-modifiers). For free-form text or unstructured key-value bags, JSON is still the right tool."
+  },
+];
+---
+<section id="faq" class="py-24">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Honest answers</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-12">
+      Questions you should be asking.
+    </h2>
+
+    <div class="space-y-3">
+      {faqs.map(({ q, a }, i) => (
+        <details class="glass rounded-xl group">
+          <summary class="px-5 py-4 cursor-pointer text-base font-semibold flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+            <span class="pr-4">{q}</span>
+            <span class="text-accent-300 text-xl flex-shrink-0 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <div class="px-5 pb-5 muted leading-relaxed text-[0.95rem]">
+            {a}
+          </div>
+        </details>
+      ))}
+    </div>
+
+    <p class="text-center muted text-sm mt-12">
+      Found another concern we didn't address?
+      <a href="https://github.com/ashru-format/ashru-format/issues" class="text-accent-300 hover:text-accent-500 font-semibold">Open an issue</a>.
+    </p>
+  </div>
+</section>

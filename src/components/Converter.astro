@@ -1,0 +1,250 @@
+---
+// Pure client-side converter — JSON ↔ ASHRU. NO LLM calls.
+// This is free for us to host AND free for users to use; runs entirely in
+// the browser. The "live extraction" tester (prose → ASHRU via LLM) is the
+// one we mark "coming soon" since it would cost tokens.
+---
+<section id="converter" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-3xl mb-12">
+      <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Try it now</div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+        Paste JSON. <span class="gradient-text">See savings instantly.</span>
+      </h2>
+      <p class="text-lg muted leading-relaxed">
+        100% in your browser. No data leaves your machine. No telemetry.
+        Auto-detects whether you pasted JSON or ASHRU and converts to the other.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-6">
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-semibold">JSON</div>
+          <div id="json-tokens" class="text-xs muted font-mono">0 tokens</div>
+        </div>
+        <textarea
+          id="json-input"
+          spellcheck="false"
+          class="w-full min-h-[320px] bg-ink-950/60 border border-white/5 rounded-lg p-3 text-[0.82rem] font-mono leading-relaxed text-ink-100 focus:outline-none focus:border-accent-500/40 transition-colors resize-y"
+          placeholder='{"verbs": [{"verb_lemma": "buy", "kartā": "Suman", "karma": "Tesla"}]}'
+        ></textarea>
+        <div id="json-err" class="text-xs text-flame-300 font-mono mt-2 min-h-[1em]"></div>
+      </div>
+
+      <div class="glass rounded-2xl p-5" style="border-color: rgba(139,92,246,0.25);">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm font-semibold">ASHRU v1</div>
+          <div id="ashru-tokens" class="text-xs muted font-mono">0 tokens</div>
+        </div>
+        <textarea
+          id="ashru-input"
+          spellcheck="false"
+          class="w-full min-h-[320px] bg-ink-950/60 border border-white/5 rounded-lg p-3 text-[0.82rem] font-mono leading-relaxed text-ink-100 focus:outline-none focus:border-accent-500/40 transition-colors resize-y"
+          placeholder="ASHRU/1&#10;V|buy|Suman|Tesla|||||p|0|"
+        ></textarea>
+        <div id="ashru-err" class="text-xs text-flame-300 font-mono mt-2 min-h-[1em]"></div>
+      </div>
+    </div>
+
+    <div id="savings-block" class="glass-strong rounded-2xl p-6 text-center mb-10" style="display:none">
+      <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">Savings on this example</div>
+      <div id="savings-pct" class="text-6xl font-extrabold gradient-text">0%</div>
+      <div id="savings-sub" class="muted text-sm mt-3"></div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-12">
+      <span class="text-sm muted self-center mr-2">Try a sample:</span>
+      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="chat">Chat message</button>
+      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="bulk">Bulk file</button>
+      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="negation">Negation + future</button>
+      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="multi">Multi-sphere</button>
+    </div>
+
+    <!-- Beta tester for full LLM extraction — coming soon -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8 border-l-4" style="border-left-color: var(--color-flame-500);">
+      <div class="flex flex-col md:flex-row md:items-center gap-5">
+        <div class="flex-1">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs muted font-mono mb-3">
+            <span class="size-1.5 rounded-full bg-flame-500"></span>
+            beta · coming soon
+          </div>
+          <h3 class="text-2xl font-bold mb-2">Live LLM extraction tester</h3>
+          <p class="muted leading-relaxed">
+            Paste prose, watch your LLM emit ASHRU records in real time, with token
+            counts and side-by-side cost vs JSON. Bring-your-own-key —
+            <a href="https://aistudio.google.com" class="text-accent-300 hover:text-accent-500">free Google AI Studio key</a> works.
+            Going live next week.
+          </p>
+        </div>
+        <a href="https://github.com/ashru-format/ashru-format/issues/new?title=Notify+me+when+live+tester+ships&body=Track+the+live+LLM+extraction+tester+release."
+           class="px-5 py-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 text-ink-100 font-semibold text-sm flex-shrink-0 text-center">
+          Track on GitHub →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  // Pure-client JSON ↔ ASHRU converter. No LLM, no network calls.
+
+  const TENSE_MAP = { past: "p", present: "n", now: "n", future: "f", conditional: "c" };
+  const TENSE_REV = { p: "past", n: "present", f: "future", c: "conditional" };
+
+  const SAMPLES = {
+    chat: { json: JSON.stringify({ verbs: [{ verb_lemma: "buy", kartā: "Suman", karma: "Tesla", karaṇa: "$60000", apādāna: "John", adhikaraṇa: "SF", tense: "past", attributes: { date: "2026-05-05" } }] }, null, 2) },
+    bulk: { json: JSON.stringify({ files: [{ path: "src/auth/google.py", verbs: [{ verb_lemma: "validate", kartā: "fn_authenticate", karma: "user_token", tense: "present" }, { verb_lemma: "raise", kartā: "fn_authenticate", karma: "invalid_token", tense: "present", attributes: { on_failure: "true" } }] }, { path: "src/auth/session.py", verbs: [{ verb_lemma: "create", kartā: "fn_login", karma: "session_obj", tense: "present" }] }] }, null, 2) },
+    negation: { json: JSON.stringify({ verbs: [{ verb_lemma: "buy", kartā: "Suman", karma: "Tesla", tense: "past", is_negated: true }, { verb_lemma: "buy", kartā: "Suman", karma: "Tesla", karaṇa: "$50000", tense: "conditional", attributes: { condition: "price_drops" } }, { verb_lemma: "deploy", kartā: "engineer", karma: "api", adhikaraṇa: "staging", tense: "future" }] }, null, 2) },
+    multi: { ashru: `ASHRU/1\nS|architect.code-review.error-handling\nV|apply|file_x|exception_handling|||||n|0|\n\nS|sre.incident-response.error-paths\nV|apply|file_x|exception_handling|||||n|0|\n\nS|engineer.refactor-checklist\nV|apply|file_x|exception_handling|||||n|0|` },
+  };
+
+  const $j = document.getElementById("json-input");
+  const $a = document.getElementById("ashru-input");
+  const $jt = document.getElementById("json-tokens");
+  const $at = document.getElementById("ashru-tokens");
+  const $jerr = document.getElementById("json-err");
+  const $aerr = document.getElementById("ashru-err");
+  const $sb = document.getElementById("savings-block");
+  const $sp = document.getElementById("savings-pct");
+  const $ss = document.getElementById("savings-sub");
+  let updating = false;
+
+  const tokenize = (s) => Math.max(0, Math.ceil((s || "").length / 4));
+
+  function setBadges(jt, at) {
+    const j = tokenize(jt), a = tokenize(at);
+    $jt.textContent = `${j} tokens`;
+    $at.textContent = `${a} tokens`;
+    if (jt.trim() && at.trim() && j > 0 && a < j) {
+      const pct = Math.round((1 - a / j) * 100);
+      $sb.style.display = "block";
+      $sp.textContent = `${pct}%`;
+      $ss.textContent = `Output side. ${j - a} tokens saved per record. Same fact, ¼ the bytes.`;
+    } else {
+      $sb.style.display = "none";
+    }
+  }
+
+  function jsonToAshru(text) {
+    const data = JSON.parse(text);
+    const lines = ["ASHRU/1"];
+    if (data.files && Array.isArray(data.files)) {
+      for (const f of data.files) {
+        lines.push(`F|${f.path || ""}`);
+        for (const v of (f.verbs || [])) lines.push(verbToAshru(v));
+      }
+    } else if (data.verbs && Array.isArray(data.verbs)) {
+      for (const v of data.verbs) lines.push(verbToAshru(v));
+    } else if (Array.isArray(data)) {
+      for (const v of data) lines.push(verbToAshru(v));
+    } else {
+      throw new Error("Expected object with 'verbs' or 'files', or a bare array.");
+    }
+    return lines.join("\n");
+  }
+
+  function verbToAshru(v) {
+    const tense = TENSE_MAP[v.tense] ?? (v.tense || "");
+    const attrs = v.attributes || {};
+    const ak = Object.keys(attrs);
+    const attrStr = ak.length ? ak.map(k => `${k}=${attrs[k]}`).join(";") : "";
+    const cols = [
+      "V",
+      String(v.verb_lemma || v.verbLemma || "").toLowerCase(),
+      v["kartā"] ?? v.karta ?? "",
+      v["karma"] ?? "",
+      v["karaṇa"] ?? v.karana ?? "",
+      v["sampradāna"] ?? v.sampradana ?? "",
+      v["apādāna"] ?? v.apadana ?? "",
+      v["adhikaraṇa"] ?? v.adhikarana ?? "",
+      tense,
+      (v.is_negated || v.isNegated) ? "1" : "0",
+      attrStr,
+    ];
+    return cols.map(c => String(c).replace(/\\/g, "\\\\").replace(/\|/g, "\\|")).join("|");
+  }
+
+  function ashruToJson(text) {
+    const lines = text.split(/\r?\n/);
+    let i = 0;
+    while (i < lines.length && !lines[i].trim()) i++;
+    if (lines[i]?.trim() !== "ASHRU/1") throw new Error("Document must start with ASHRU/1");
+    i++;
+    const verbs = [];
+    const files = [];
+    let curFile = null, curSphere = null;
+    for (; i < lines.length; i++) {
+      const line = lines[i];
+      const stripped = line.trim();
+      if (!stripped || stripped.startsWith("#")) continue;
+      if (line.startsWith("F|")) { curFile = line.slice(2).trim(); files.push(curFile); continue; }
+      if (line.startsWith("S|")) { curSphere = line.slice(2).trim(); continue; }
+      if (line.startsWith("V|")) {
+        const cols = splitEsc(line);
+        if (cols.length !== 11) continue;
+        const [, lemma, karta, karma, karana, sampradana, apadana, adhikarana, tense, neg, attrs] = cols;
+        if (!lemma) continue;
+        const obj = { verb_lemma: lemma };
+        if (karta) obj["kartā"] = karta;
+        if (karma) obj["karma"] = karma;
+        if (karana) obj["karaṇa"] = karana;
+        if (sampradana) obj["sampradāna"] = sampradana;
+        if (apadana) obj["apādāna"] = apadana;
+        if (adhikarana) obj["adhikaraṇa"] = adhikarana;
+        if (tense) obj.tense = TENSE_REV[tense] || tense;
+        if (neg === "1") obj.is_negated = true;
+        if (attrs) {
+          const a = {};
+          for (const p of attrs.split(";")) { const eq = p.indexOf("="); if (eq > 0) a[p.slice(0,eq).trim()] = p.slice(eq+1).trim(); }
+          if (Object.keys(a).length) obj.attributes = a;
+        }
+        if (curFile) obj.file = curFile;
+        if (curSphere) obj.sphere = curSphere;
+        verbs.push(obj);
+      }
+    }
+    return JSON.stringify({ verbs }, null, 2);
+  }
+
+  function splitEsc(line) {
+    const out = []; let buf = ""; let i = 0;
+    while (i < line.length) {
+      const c = line[i];
+      if (c === "\\" && i + 1 < line.length) { buf += line[i+1]; i += 2; continue; }
+      if (c === "|") { out.push(buf); buf = ""; i++; continue; }
+      buf += c; i++;
+    }
+    out.push(buf);
+    return out;
+  }
+
+  function onJ() {
+    if (updating) return;
+    const t = $j.value;
+    $jerr.textContent = "";
+    if (!t.trim()) { updating=true; $a.value=""; updating=false; setBadges("",""); return; }
+    try { const r = jsonToAshru(t); updating=true; $a.value=r; updating=false; $aerr.textContent=""; setBadges(t, r); }
+    catch (e) { $jerr.textContent = e.message; setBadges(t, $a.value); }
+  }
+  function onA() {
+    if (updating) return;
+    const t = $a.value;
+    $aerr.textContent = "";
+    if (!t.trim()) { updating=true; $j.value=""; updating=false; setBadges("",""); return; }
+    try { const r = ashruToJson(t); updating=true; $j.value=r; updating=false; $jerr.textContent=""; setBadges(r, t); }
+    catch (e) { $aerr.textContent = e.message; setBadges($j.value, t); }
+  }
+
+  $j.addEventListener("input", onJ);
+  $a.addEventListener("input", onA);
+  document.querySelectorAll(".sample-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const s = SAMPLES[btn.dataset.sample]; if (!s) return;
+      if (s.json) { $j.value = s.json; onJ(); }
+      else if (s.ashru) { $a.value = s.ashru; onA(); }
+    });
+  });
+  // Auto-load chat sample
+  $j.value = SAMPLES.chat.json; onJ();
+</script>

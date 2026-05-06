@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import DropInChange from '../components/DropInChange.astro';
+import WhatIsAshru from '../components/WhatIsAshru.astro';
+import Etymology from '../components/Etymology.astro';
+import BatchExtraction from '../components/BatchExtraction.astro';
+import MathTable from '../components/MathTable.astro';
+import Converter from '../components/Converter.astro';
+import FAQ from '../components/FAQ.astro';
+import Footer from '../components/Footer.astro';
+---
+<Layout
+  title="json2ashru — Stop paying LLMs for JSON punctuation"
+  description="JSON wastes 60–80% of your LLM output tokens on brackets, quotes, and repeated keys. ASHRU is a pipe-delimited format that drops the cost. Built on Pāṇini's 6 kāraka case roles — 2,500 years old, public domain."
+  canonical="https://json2ashru.com"
+>
+  <Nav />
+  <main>
+    <Hero />
+    <DropInChange />
+    <WhatIsAshru />
+    <Etymology />
+    <BatchExtraction />
+    <MathTable />
+    <Converter />
+    <FAQ />
+  </main>
+  <Footer />
+</Layout>

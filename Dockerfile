@@ -1,29 +1,30 @@
-# ashru.dev — static marketing website, served by nginx on Google Cloud Run.
-#
-# This repo (SUMAProAI/ashru-website) holds ONLY the website. The format
-# itself — spec, reference parsers, SDK, tutorials — lives in a separate
-# public repo: github.com/ashru-format/ashru-format.
-#
-# We bundle a copy of parsers/javascript/ashru.js inside this repo so the
-# converter can import it locally (zero runtime dependency on the format
-# repo or any CDN). Periodically sync via tools/sync-parser.sh.
-#
-# Build context = repo root. Submit:
-#   gcloud builds submit --config cloudbuild.yaml --project quadframe .
+# Multi-stage build: Node compiles Astro → nginx serves the static dist/.
+# Targets Google Cloud Run (must listen on $PORT, default 8080).
 
+# ── Stage 1: build ───────────────────────────────────────────────────
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --silent || npm install --silent
+COPY . .
+RUN npm run build
+
+# ── Stage 2: serve ───────────────────────────────────────────────────
 FROM nginx:1.27-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Static assets at the web root
-COPY index.html converter.html style.css favicon.svg /usr/share/nginx/html/
-
-# Bundled JS parser the converter imports from "../parsers/javascript/ashru.js"
-RUN mkdir -p /usr/share/nginx/html/parsers/javascript
-COPY parsers/javascript/ashru.js /usr/share/nginx/html/parsers/javascript/ashru.js
-
-# Cloud Run listens on $PORT (default 8080); nginx defaults to 80.
+# Cloud Run listens on $PORT (default 8080). Rewrite the default 80.
 RUN sed -i 's/listen       80;/listen       8080;/g' /etc/nginx/conf.d/default.conf \
  && sed -i 's/listen  \[::\]:80;/listen  [::]:8080;/g' /etc/nginx/conf.d/default.conf || true
 
-EXPOSE 8080
+# Add gzip + sensible cache headers — these are real perf wins, ~70% size cut.
+RUN cat > /etc/nginx/conf.d/perf.conf <<'NGINXEOF'
+gzip on;
+gzip_vary on;
+gzip_min_length 256;
+gzip_comp_level 6;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+NGINXEOF
 
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

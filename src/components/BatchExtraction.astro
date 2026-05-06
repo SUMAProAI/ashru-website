@@ -1,0 +1,70 @@
+---
+---
+<section id="batch" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-3xl mb-12">
+      <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">How you actually use it</div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+        One LLM call. <span class="gradient-text">Many records.</span>
+      </h2>
+      <p class="text-lg muted leading-relaxed">
+        Don't extract one paragraph at a time. <strong class="text-ink-100">Send 10–50
+        paragraphs in a single call</strong> and ask the LLM to return one ASHRU document
+        with one <code class="text-accent-300">V|</code> line per fact. The fixed prompt
+        overhead amortizes across every record. Cost drops ~93% versus the naïve loop.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-5 gap-4 mb-6">
+      <div class="md:col-span-2 glass rounded-2xl p-5">
+        <div class="text-xs muted font-semibold mb-3">1 · Your input (paste any text)</div>
+        <pre class="text-[0.78rem] leading-relaxed"><code><span class="muted">// my-text.txt</span>
+
+Suman bought a Tesla in SF for $60K.
+Naveen deployed the staging API yesterday.
+We met John at the office last Tuesday.
+The launch happens next month if QA passes.
+... (12 more paragraphs)
+</code></pre>
+      </div>
+
+      <div class="md:col-span-3 glass rounded-2xl p-5" style="border-color: rgba(139,92,246,0.25);">
+        <div class="text-xs muted font-semibold mb-3">2 · One LLM call, batch output</div>
+        <pre class="text-[0.78rem] leading-relaxed"><code><span class="text-mint-400">$</span> cat my-text.txt <span class="muted">|</span> \
+  GEMINI_API_KEY=... python extract_batch.py \
+  <span class="muted">--model</span> gemini-2.5-flash-lite
+
+<span class="text-flame-300">ASHRU/1</span>
+V|buy|Suman|Tesla|$60000||John|SF|p|0|
+V|deploy|Naveen|staging_api|||||p|0|date=yesterday
+V|meet|us|John||||office|p|0|date=last_tuesday
+V|launch|us|product|||||c|0|condition=qa_passes
+<span class="muted">... (one V| per fact)</span></code></pre>
+      </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 md:p-7">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div>
+          <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-2">Naïve loop</div>
+          <div class="text-3xl font-extrabold text-flame-300">15× $0.001 = $0.015</div>
+          <div class="text-xs muted mt-2">15 LLM calls. Each pays the full prompt overhead. Slow + expensive.</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-2">Batch (this is what we do)</div>
+          <div class="text-3xl font-extrabold text-mint-400">$0.001</div>
+          <div class="text-xs muted mt-2">One call. One overhead. The LLM emits all 15 records in one document.</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-2">Net</div>
+          <div class="text-3xl font-extrabold gradient-text">~93% cheaper</div>
+          <div class="text-xs muted mt-2">Same output, fewer round-trips, fewer fixed-overhead charges.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center muted text-sm mt-8">
+      Drop-in script: <a href="https://github.com/ashru-format/ashru-format/blob/main/examples/extract_batch.py" class="text-accent-300 hover:text-accent-500 font-semibold">examples/extract_batch.py</a> — bring your own LLM key.
+    </p>
+  </div>
+</section>

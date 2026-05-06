@@ -1,0 +1,95 @@
+---
+---
+<header class="relative pt-20 pb-24 md:pt-28 md:pb-32 overflow-hidden">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="fade-in inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs muted mb-7 border-white/10">
+      <span class="inline-block size-1.5 rounded-full bg-mint-500 animate-pulse"></span>
+      <span class="font-mono">v1.0 spec · CC0 public domain · MIT parsers</span>
+    </div>
+
+    <h1 class="fade-in fade-in-delay-1 text-5xl md:text-7xl font-extrabold tracking-tight leading-[0.95] max-w-4xl">
+      The <span class="gradient-text">semantic wire format</span><br/>for AI memory.
+    </h1>
+
+    <p class="fade-in fade-in-delay-2 text-lg md:text-xl muted leading-relaxed mt-7 max-w-2xl">
+      <strong class="text-ink-100">Coming from JSON?</strong> ASHRU drops 60–80% of your output tokens by killing
+      the brackets, quotes, and repeated field names. <strong class="text-ink-100">Coming from TOON?</strong>
+      ASHRU keeps the pipe compression and adds the six grammatical slots TOON leaves on the table —
+      so retrieval is structural, not just compressed.
+    </p>
+
+    <p class="fade-in fade-in-delay-2 text-base muted mt-3 max-w-2xl">
+      Built on the case roles Pāṇini formalized in Sanskrit 2,500 years ago. Public domain.
+      Drop-in compatible with every LLM you already use.
+    </p>
+
+    <div class="fade-in fade-in-delay-3 flex flex-wrap gap-3 mt-10">
+      <a href="#converter"
+         class="px-5 py-3 rounded-lg bg-accent-500 hover:bg-accent-600 text-white font-semibold transition-colors text-sm">
+        Try the live converter →
+      </a>
+      <a href="#math"
+         class="px-5 py-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 text-ink-100 font-semibold transition-colors text-sm">
+        See the math
+      </a>
+      <a href="https://github.com/ashru-format/ashru-format"
+         class="px-5 py-3 rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 text-ink-300 font-semibold transition-colors text-sm">
+        GitHub →
+      </a>
+    </div>
+
+    <!-- Hero side-by-side -->
+    <div class="fade-in fade-in-delay-4 mt-16 grid md:grid-cols-2 gap-4">
+      <div class="glass rounded-2xl p-5 md:p-6">
+        <div class="flex items-center justify-between text-xs muted mb-4">
+          <span class="font-mono">JSON output · ~120 tokens</span>
+          <span class="text-flame-300 font-mono">$0.000048/record</span>
+        </div>
+        <pre class="code-block !bg-transparent !border-0 !p-0 text-[0.78rem] leading-relaxed"><code>{`{`}
+  "verbs": [{`{`}
+    "verb_lemma": "buy",
+    "kartā": "Suman",
+    "karma": "Tesla",
+    "karaṇa": "$60000",
+    "apādāna": "John",
+    "adhikaraṇa": "SF",
+    "tense": "past",
+    "is_negated": false
+  {`}`}]
+{`}`}</code></pre>
+      </div>
+      <div class="rounded-2xl p-5 md:p-6 glass" style="border-color: rgba(139,92,246,0.25); background: rgba(139,92,246,0.04);">
+        <div class="flex items-center justify-between text-xs muted mb-4">
+          <span class="font-mono">ASHRU output · ~25 tokens</span>
+          <span class="text-mint-400 font-mono">$0.000010/record</span>
+        </div>
+        <pre class="code-block !bg-transparent !border-0 !p-0 text-[0.78rem] leading-relaxed"><code>ASHRU/1
+V|buy|Suman|Tesla|$60000||John|SF|p|0|</code></pre>
+        <div class="mt-6 pt-4 border-t border-white/5">
+          <div class="text-3xl font-extrabold gradient-text">79.2% smaller</div>
+          <div class="text-xs muted mt-1">Output side. Same fact. Math below.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="fade-in fade-in-delay-4 grid grid-cols-2 md:grid-cols-4 gap-3 mt-10">
+      <div class="glass rounded-xl px-4 py-4 text-center">
+        <div class="text-2xl font-extrabold">4.8×</div>
+        <div class="text-xs muted mt-1">smaller per record</div>
+      </div>
+      <div class="glass rounded-xl px-4 py-4 text-center">
+        <div class="text-2xl font-extrabold">~80%</div>
+        <div class="text-xs muted mt-1">output token savings</div>
+      </div>
+      <div class="glass rounded-xl px-4 py-4 text-center">
+        <div class="text-2xl font-extrabold">0</div>
+        <div class="text-xs muted mt-1">runtime dependencies</div>
+      </div>
+      <div class="glass rounded-xl px-4 py-4 text-center">
+        <div class="text-2xl font-extrabold">2,500</div>
+        <div class="text-xs muted mt-1">years old (Pāṇini)</div>
+      </div>
+    </div>
+  </div>
+</header>

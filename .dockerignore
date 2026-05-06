@@ -1,20 +1,8 @@
-# Keep the Docker build context tiny — only ship what nginx serves.
 .git
 .gitignore
 .github
 node_modules
-__pycache__
-*.pyc
-.pytest_cache
-.venv
-venv
-.vercel
+dist
+.astro
 .DS_Store
-
-# Source-only docs, not served by the website
-LAUNCH_CHECKLIST.md
-CONTRIBUTING.md
-CHANGELOG.md
-
-# Tests don't ship to the runtime
-tests/
+README.md
