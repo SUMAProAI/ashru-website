@@ -1,0 +1,42 @@
+---
+---
+<section id="thesis" class="py-24">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-4">Why this exists</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-10 max-w-4xl">
+      The next scaling bottleneck isn't compute.<br/>
+      <span class="gradient-text">It's semantic inefficiency.</span>
+    </h2>
+
+    <div class="grid md:grid-cols-3 gap-4 mb-10">
+      <div class="glass rounded-2xl p-6">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">1990s</div>
+        <div class="text-lg font-semibold text-ink-100 mb-2">XML standardized documents</div>
+        <p class="text-sm muted leading-relaxed">Verbose. Heavy. Designed for parsing by machines that had cycles to spare.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">2000s</div>
+        <div class="text-lg font-semibold text-ink-100 mb-2">JSON standardized APIs</div>
+        <p class="text-sm muted leading-relaxed">Lighter. Human-readable. Optimized for engineers writing endpoints.</p>
+      </div>
+      <div class="rounded-2xl p-6 glass" style="border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.04);">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">2026 →</div>
+        <div class="text-lg font-semibold text-ink-100 mb-2">ASHRU standardizes semantics</div>
+        <p class="text-sm muted leading-relaxed">For machines generating structured meaning under token-billed constraints. The protobuf moment for AI semantics.</p>
+      </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-7 md:p-9 border-l-4" style="border-left-color: var(--color-accent-500);">
+      <p class="text-xl md:text-2xl text-ink-100 leading-relaxed font-medium">
+        Every brace, every quote, every repeated field name in your LLM's output is
+        <span class="text-flame-300">billable token waste</span>. At one record it doesn't matter.
+        At a million records, it's <span class="gradient-text">economically catastrophic.</span>
+      </p>
+      <p class="text-base muted leading-relaxed mt-5">
+        ASHRU is positional, schema-implicit, and deterministic. The wire format gets out of the way so
+        the model can spend tokens on data, not punctuation. Compatible with every LLM you already use —
+        change one line of your prompt's output instruction, replace JSON.parse with ashru.parse.
+      </p>
+    </div>
+  </div>
+</section>
