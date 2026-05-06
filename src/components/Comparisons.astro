@@ -1,0 +1,35 @@
+---
+const comparisons = [
+  { name: 'JSON', verdict: 'Different job', reason: 'Designed for human-readable APIs. ASHRU is designed for machine-generated semantics. Use both, in different places.' },
+  { name: 'Protobuf', verdict: 'LLMs can\'t emit it', reason: 'Binary format. LLMs hallucinate magic numbers and offsets when asked to emit raw bytes. ASHRU is text — what LLMs are actually built to produce.' },
+  { name: 'MessagePack', verdict: 'Binary, same problem', reason: 'Same as Protobuf — LLMs are not reliable binary emitters. ASHRU stays text-native and BPE-friendly.' },
+  { name: 'YAML', verdict: 'Repeats the keys', reason: 'YAML is human-friendly but every key is still written out per record. At a million records, you pay for `verb_lemma:` a million times.' },
+  { name: 'CSV / TSV', verdict: 'Flat-only', reason: 'CSV is for flat tables. ASHRU supports nested file (`F|`) and contextual sphere (`S|`) markers in a single payload — semantic structure CSV can\'t express.' },
+  { name: 'JSON-Schema Structured Outputs', verdict: 'Caches schema, still pays for output', reason: 'OpenAI / Gemini / Claude schema caching reduces SCHEMA-PROMPT cost. They still bill you per generated output token. ASHRU attacks the more expensive side: output.' },
+  { name: 'NDJSON / JSONL', verdict: 'Per-row JSON tax', reason: 'Newline-delimited JSON gives you streaming, but every row still pays the JSON tax (braces, quotes, repeated keys). ASHRU drops both.' },
+  { name: 'XML', verdict: '🪦', reason: 'Verbose enough that even Java engineers stopped using it for new wire formats around 2010. We will not relitigate this.' },
+];
+---
+<section id="comparisons" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">First questions a critic asks</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5 max-w-4xl">
+      Why not just <span class="gradient-text">use [X]</span>?
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
+      Every alternative has a real argument. Here are the eight you should be asking — answered honestly, no hand-waving.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-3">
+      {comparisons.map(c => (
+        <div class="glass rounded-xl p-5 hover:border-accent-500/30 transition-all">
+          <div class="flex items-baseline justify-between mb-2 gap-3">
+            <h3 class="text-base font-bold text-ink-100">Why not {c.name}?</h3>
+            <span class="text-xs text-flame-300 font-mono uppercase tracking-wider whitespace-nowrap">{c.verdict}</span>
+          </div>
+          <p class="text-sm muted leading-relaxed">{c.reason}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

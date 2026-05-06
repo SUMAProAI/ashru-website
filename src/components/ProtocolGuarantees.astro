@@ -1,0 +1,72 @@
+---
+---
+<section id="protocol" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">The hard parts, answered</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5 max-w-4xl">
+      Protocol guarantees, <span class="gradient-text">not vibes.</span>
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
+      Two things any serious engineer attacks first: what happens when a value contains the delimiter, and what happens when the LLM emits the wrong number of columns. Both are spec-defined, both are tested.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <!-- Escaping -->
+      <div class="glass rounded-2xl p-6">
+        <div class="flex items-baseline justify-between mb-3 gap-3">
+          <h3 class="text-lg font-bold text-ink-100">Delimiter escaping</h3>
+          <span class="text-xs text-mint-400 font-mono uppercase tracking-wider">Spec rule §3.4</span>
+        </div>
+        <p class="text-sm muted leading-relaxed mb-4">
+          A literal pipe inside a value is escaped with a backslash. The reference parser un-escapes during column split, so the value <code class="text-accent-300 bg-black/30 px-1 rounded text-xs">Suman | CEO</code> round-trips correctly without inflating column count.
+        </p>
+        <pre class="code-block !text-[0.78rem] leading-relaxed mb-3"><code><span class="muted"># Source value</span>
+"Suman | CEO"
+
+<span class="muted"># On the wire</span>
+V|hire|Acme|Suman \| CEO|...
+
+<span class="muted"># After ashru.parse(...)</span>
+verb.karma == "Suman | CEO"   <span class="text-mint-400">✓</span></code></pre>
+        <p class="text-xs muted leading-relaxed">Escape cost: 1 character per pipe. Fields containing pipes are rare in practice (titles, IDs); kāraka role values almost never collide with the delimiter.</p>
+      </div>
+
+      <!-- Column count tolerance -->
+      <div class="glass rounded-2xl p-6" style="border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.04);">
+        <div class="flex items-baseline justify-between mb-3 gap-3">
+          <h3 class="text-lg font-bold text-ink-100">Wrong column count</h3>
+          <span class="text-xs text-mint-400 font-mono uppercase tracking-wider">Spec rule §4.2</span>
+        </div>
+        <p class="text-sm muted leading-relaxed mb-4">
+          If a row has fewer or more than the 10 V-columns, the reference parser logs the row to a warnings list and skips it. The document does not crash. This is intentional — at million-row scale, one drift-by-one row should not lose the entire batch.
+        </p>
+        <pre class="code-block !text-[0.78rem] leading-relaxed mb-3"><code><span class="muted"># Hallucinated 9-column row</span>
+V|buy|Suman|Tesla|$60000||John|SF|p
+
+<span class="muted"># Parser behaviour</span>
+doc = ashru.parse(text)
+len(doc.verbs)         <span class="muted"># good rows only</span>
+len(doc.warnings)      <span class="muted"># 1: bad column count</span>
+doc.warnings[0].line   <span class="muted"># source line number</span></code></pre>
+        <p class="text-xs muted leading-relaxed">Strict mode (<code class="text-accent-300 bg-black/30 px-1 rounded text-xs">parse(..., strict=True)</code>) raises on the first bad row — opt in if you need fail-fast batch semantics.</p>
+      </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 md:p-7 mt-4">
+      <div class="grid md:grid-cols-3 gap-6 text-sm">
+        <div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Spec coverage</div>
+          <p class="muted leading-relaxed">v1.0 spec covers: 10-column V grammar, F-line file context, S-line sphere context, comments (<code class="text-accent-300 text-xs">#</code>), blank-line tolerance, UTF-8, escaping (<code class="text-accent-300 text-xs">\|</code>, <code class="text-accent-300 text-xs">\\</code>, <code class="text-accent-300 text-xs">\n</code>), and parser warnings contract.</p>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Reference parsers</div>
+          <p class="muted leading-relaxed">Python and JavaScript reference parsers in the repo. Round-trip tested against the v1.0 conformance suite. ~250 LOC each, zero dependencies, MIT.</p>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Packages (in flight)</div>
+          <p class="muted leading-relaxed"><code class="text-accent-300 text-xs">pip install ashru</code> and <code class="text-accent-300 text-xs">npm install @ashru/parser</code> are this week's milestone. Until then, single-file copy. Spec is frozen and versioned (v1.0).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

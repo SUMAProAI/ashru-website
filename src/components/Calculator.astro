@@ -1,4 +1,6 @@
 ---
+// Pricing assumptions per model (May 2026 published rates).
+// USD per 1M tokens.
 ---
 <section id="calculator" class="py-24">
   <div class="max-w-5xl mx-auto px-6">
@@ -7,20 +9,32 @@
       How much does <span class="gradient-text">JSON cost you</span> at scale?
     </h2>
     <p class="text-lg muted leading-relaxed mb-10 max-w-3xl">
-      Plug in your traffic. We compute the LLM bill at Gemini Flash Lite published rates ($0.10/M input, $0.40/M output) for both formats, side by side. No login. No telemetry. Pure math, runs in your browser.
+      Plug in your traffic and pick your model. We compute the LLM bill for both formats at published rates, side by side. No login. No telemetry. Pure math, runs in your browser.
     </p>
 
     <div class="glass-strong rounded-2xl p-6 md:p-8">
-      <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
         <div>
-          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Records extracted per day</label>
-          <input id="calc-records" type="number" value="100000" min="1" step="1000" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-lg focus:outline-none focus:border-accent-500/40 transition-colors"/>
-          <div class="text-xs muted mt-1">e.g., 100,000 = a small SaaS extracting one fact per chat message at moderate volume</div>
+          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Model</label>
+          <select id="calc-model" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-base focus:outline-none focus:border-accent-500/40 transition-colors">
+            <option value="gemini-flash-lite" selected>Gemini 2.5 Flash Lite ($0.10 / $0.40 per M)</option>
+            <option value="gemini-flash">Gemini 2.5 Flash ($0.30 / $2.50 per M)</option>
+            <option value="gpt-4o-mini">OpenAI GPT-4o-mini ($0.15 / $0.60 per M)</option>
+            <option value="gpt-4o">OpenAI GPT-4o ($2.50 / $10.00 per M)</option>
+            <option value="claude-haiku">Anthropic Claude Haiku 4.5 ($1.00 / $5.00 per M)</option>
+            <option value="claude-sonnet">Anthropic Claude Sonnet 4.6 ($3.00 / $15.00 per M)</option>
+          </select>
+          <div class="text-xs muted mt-1">Prices verified May 2026 from each provider's pricing page.</div>
         </div>
         <div>
-          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Avg input tokens per record</label>
+          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Records / day</label>
+          <input id="calc-records" type="number" value="100000" min="1" step="1000" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-lg focus:outline-none focus:border-accent-500/40 transition-colors"/>
+          <div class="text-xs muted mt-1">100k = small SaaS extraction at moderate volume</div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-[0.15em] muted font-semibold block mb-2">Avg input tokens / record</label>
           <input id="calc-input" type="number" value="200" min="1" step="10" class="w-full bg-ink-950/60 border border-white/10 rounded-lg px-4 py-3 text-ink-100 font-mono text-lg focus:outline-none focus:border-accent-500/40 transition-colors"/>
-          <div class="text-xs muted mt-1">Length of the prose you send to the LLM. ~200 = a typical chat paragraph.</div>
+          <div class="text-xs muted mt-1">200 = a typical chat paragraph</div>
         </div>
       </div>
 
@@ -57,22 +71,24 @@
       </div>
 
       <div class="text-xs muted leading-relaxed bg-white/[0.02] rounded-lg p-4 border border-white/5">
-        <strong class="text-ink-100">How we compute:</strong>
-        Output side, JSON ≈ 1.0× input tokens (verbose schema, repeated keys), ASHRU ≈ 0.25× input tokens (positional, no keys). Gemini Flash Lite May-2026 pricing: input $0.10/1M tokens, output $0.40/1M tokens. Output dominates because output is 4× input rate. Your real numbers depend on tokenization specifics — verify with <a href="https://github.com/openai/tiktoken" class="text-accent-300 hover:text-accent-500">tiktoken</a>.
+        <strong class="text-ink-100">Math, no hand-waving:</strong>
+        Output side, JSON ≈ 1.0× input tokens (verbose schema, repeated keys), ASHRU ≈ 0.25× input tokens (positional, no keys). Output dominates because every model bills output 4–10× the input rate. Real numbers depend on your tokenizer specifics — verify with <a href="https://github.com/openai/tiktoken" class="text-accent-300 hover:text-accent-500">tiktoken</a> or your provider's tokenizer. Pricing reflects published May 2026 list rates; volume discounts not included.
       </div>
     </div>
-
-    <p class="text-center muted text-sm mt-6">
-      <strong class="text-ink-100">Default scenario at 100K records/day, 200 input tokens:</strong>
-      JSON costs you ~$36k/year. ASHRU drops it to ~$11k/year. <span class="gradient-text font-semibold">$25,000+ saved per year, per pipeline.</span>
-    </p>
   </div>
 </section>
 
 <script type="module">
-  // Pricing assumptions (Gemini Flash Lite, May 2026)
-  const INPUT_PRICE_PER_M = 0.10;
-  const OUTPUT_PRICE_PER_M = 0.40;
+  // Pricing per model — published rates as of May 2026.
+  // [input price per 1M tokens, output price per 1M tokens]
+  const PRICING = {
+    'gemini-flash-lite': [0.10, 0.40],
+    'gemini-flash':      [0.30, 2.50],
+    'gpt-4o-mini':       [0.15, 0.60],
+    'gpt-4o':            [2.50, 10.00],
+    'claude-haiku':      [1.00, 5.00],
+    'claude-sonnet':     [3.00, 15.00],
+  };
   const JSON_OUTPUT_RATIO = 1.0;
   const ASHRU_OUTPUT_RATIO = 0.25;
 
@@ -80,15 +96,17 @@
   const fmtTok = (n) => n.toLocaleString('en-US') + ' tok';
 
   function recompute() {
+    const model = document.getElementById('calc-model').value;
+    const [INPUT_PRICE, OUTPUT_PRICE] = PRICING[model] || PRICING['gemini-flash-lite'];
     const records = Math.max(0, +document.getElementById('calc-records').value || 0);
     const inputPer = Math.max(0, +document.getElementById('calc-input').value || 0);
     const inputDay = records * inputPer;
-    const outputJsonDay = records * inputPer * JSON_OUTPUT_RATIO;
-    const outputAshruDay = records * inputPer * ASHRU_OUTPUT_RATIO;
+    const outputJsonDay = inputDay * JSON_OUTPUT_RATIO;
+    const outputAshruDay = inputDay * ASHRU_OUTPUT_RATIO;
 
-    const inputCost = inputDay * INPUT_PRICE_PER_M / 1_000_000;
-    const jsonOutCost = outputJsonDay * OUTPUT_PRICE_PER_M / 1_000_000;
-    const ashruOutCost = outputAshruDay * OUTPUT_PRICE_PER_M / 1_000_000;
+    const inputCost = inputDay * INPUT_PRICE / 1_000_000;
+    const jsonOutCost = outputJsonDay * OUTPUT_PRICE / 1_000_000;
+    const ashruOutCost = outputAshruDay * OUTPUT_PRICE / 1_000_000;
     const jsonDay = inputCost + jsonOutCost;
     const ashruDay = inputCost + ashruOutCost;
     const jsonYear = jsonDay * 365;
@@ -100,17 +118,15 @@
     document.getElementById('calc-json-out').textContent = fmtTok(outputJsonDay);
     document.getElementById('calc-json-day').textContent = fmt(jsonDay);
     document.getElementById('calc-json-year').textContent = fmt(jsonYear);
-
     document.getElementById('calc-ashru-in').textContent = fmtTok(inputDay);
     document.getElementById('calc-ashru-out').textContent = fmtTok(outputAshruDay);
     document.getElementById('calc-ashru-day').textContent = fmt(ashruDay);
     document.getElementById('calc-ashru-year').textContent = fmt(ashruYear);
-
     document.getElementById('calc-savings-pct').textContent = savedPct + '%';
-    document.getElementById('calc-savings-line').textContent = `lower than JSON. Output side does most of the work — JSON outputs 4× the tokens of ASHRU per record.`;
+    document.getElementById('calc-savings-line').textContent = `lower than JSON. At this scale, ASHRU saves you ${fmt(saved)} per year.`;
     document.getElementById('calc-savings-year').textContent = fmt(saved);
   }
-
+  document.getElementById('calc-model').addEventListener('change', recompute);
   document.getElementById('calc-records').addEventListener('input', recompute);
   document.getElementById('calc-input').addEventListener('input', recompute);
   recompute();

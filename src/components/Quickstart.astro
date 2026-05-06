@@ -1,0 +1,97 @@
+---
+---
+<section id="quickstart" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-xs uppercase tracking-[0.2em] muted font-semibold mb-3">5 minutes to your first ASHRU row</div>
+    <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-5">
+      How to <span class="gradient-text">use it.</span>
+    </h2>
+    <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
+      Three steps. Bring your own LLM key. No SDK to install beyond a single 250-LOC parser. Works with any model that can follow instructions.
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <!-- Step 1 -->
+      <div class="glass rounded-2xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-full bg-accent-500/20 border border-accent-500/40 flex items-center justify-center text-accent-300 font-mono font-bold text-sm">1</div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold">Install parser</div>
+        </div>
+        <h3 class="text-lg font-bold text-ink-100 mb-3">Pick your language</h3>
+        <pre class="code-block !text-[0.78rem] leading-relaxed mb-3"><code><span class="text-mint-400"># Python</span>
+git clone github.com/ashru-format/\
+  ashru-format
+cp ashru-format/parsers/python/\
+  ashru.py your_project/
+
+<span class="text-mint-400"># JavaScript</span>
+cp ashru-format/parsers/javascript/\
+  ashru.js your_project/</code></pre>
+        <p class="text-xs muted leading-relaxed">Zero runtime dependencies. Single file, ~250 LOC each. MIT-licensed.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="glass rounded-2xl p-6" style="border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.04);">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-full bg-accent-500/20 border border-accent-500/40 flex items-center justify-center text-accent-300 font-mono font-bold text-sm">2</div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold">Update your prompt</div>
+        </div>
+        <h3 class="text-lg font-bold text-ink-100 mb-3">One line swap</h3>
+        <pre class="code-block !text-[0.78rem] leading-relaxed mb-3"><code><span class="text-flame-300"># BEFORE (JSON)</span>
+"Return JSON with verb, kartā,
+karma fields"
+
+<span class="text-mint-400"># AFTER (ASHRU)</span>
+"Return ASHRU/1 — one V| line
+per fact. 10 columns:
+V|verb|kartā|karma|karaṇa|
+sampradāna|apādāna|adhikaraṇa|
+tense|negated|attributes"</code></pre>
+        <p class="text-xs muted leading-relaxed">The model already knows how to follow column-position instructions. No fine-tuning required.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="glass rounded-2xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-full bg-accent-500/20 border border-accent-500/40 flex items-center justify-center text-accent-300 font-mono font-bold text-sm">3</div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold">Parse the response</div>
+        </div>
+        <h3 class="text-lg font-bold text-ink-100 mb-3">Replace JSON.parse</h3>
+        <pre class="code-block !text-[0.78rem] leading-relaxed mb-3"><code><span class="text-flame-300"># BEFORE</span>
+import json
+data = json.loads(llm_response)
+
+<span class="text-mint-400"># AFTER</span>
+from ashru import parse
+doc = parse(llm_response)
+for verb in doc.verbs:
+    print(verb.verb_lemma,
+          verb.karta,
+          verb.karma)</code></pre>
+        <p class="text-xs muted leading-relaxed">Tolerant by design — malformed rows logged + skipped, not raised.</p>
+      </div>
+    </div>
+
+    <!-- Drop-in batch script -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8 mt-6">
+      <div class="flex flex-col md:flex-row md:items-center gap-6">
+        <div class="flex-1">
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Or skip the steps</div>
+          <h3 class="text-xl font-bold text-ink-100 mb-2">Use the drop-in batch extractor</h3>
+          <p class="text-sm muted leading-relaxed mb-4">
+            <code class="text-accent-300 bg-black/30 px-2 py-0.5 rounded text-xs">examples/extract_batch.py</code> — pipe prose in, get an ASHRU document out. Bring your own key (Gemini, OpenAI, or Anthropic). Already on GitHub, ready to run.
+          </p>
+          <pre class="code-block !text-[0.78rem] leading-relaxed"><code><span class="text-mint-400">$</span> cat my_text.txt <span class="muted">|</span> \
+    GEMINI_API_KEY=... python extract_batch.py
+<span class="muted">→ ASHRU/1</span>
+<span class="muted">→ V|buy|Suman|Tesla|$60000||John|SF|p|0|</span>
+<span class="muted">→ V|deploy|engineer|api||||staging|f|0|</span>
+<span class="muted">→ ... (one V| per fact)</span></code></pre>
+        </div>
+        <a href="https://github.com/ashru-format/ashru-format/blob/main/examples/extract_batch.py" class="px-5 py-3 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-ink-100 font-semibold text-sm flex-shrink-0 text-center">
+          View script on GitHub →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

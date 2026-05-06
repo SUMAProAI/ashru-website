@@ -4,6 +4,7 @@ const integrations = [
     name: 'LangChain',
     tagline: 'Drop-in output parser',
     description: 'Replace Pydantic-JSON output stage with AshruOutputParser. Same chain, ~4× fewer output tokens.',
+    color: 'mint',
     code: `from langchain_core.output_parsers import BaseOutputParser
 from ashru import parse
 
@@ -12,39 +13,69 @@ class AshruOutputParser(BaseOutputParser):
         return parse(text).verbs
 
 chain = ASHRU_PROMPT | llm | AshruOutputParser()`,
-    color: 'mint',
   },
   {
-    name: 'OpenAI / Claude / Gemini',
+    name: 'OpenAI · Claude · Gemini',
     tagline: 'Bring your own LLM',
     description: 'One prompt instruction. Replace JSON-output schema with the ASHRU/1 column convention. Works on every major LLM.',
+    color: 'accent',
     code: `# extract_batch.py — pipe prose in, ASHRU out
 cat my_paragraphs.txt | python extract_batch.py \\
     --provider gemini \\
     --model gemini-2.5-flash-lite
 
 # → ASHRU/1
-# → V|buy|Suman|Tesla|$60000||John|SF|p|0|
-# → ... (one V| per fact)`,
-    color: 'accent',
+# → V|buy|Suman|Tesla|$60000||John|SF|p|0|`,
   },
   {
-    name: 'Neo4j / Postgres / pgvector',
+    name: 'MCP (Model Context Protocol)',
+    tagline: 'AI-native tool calls',
+    description: 'Define an MCP tool that returns ASHRU rows instead of verbose JSON. Claude / Cursor / Windsurf agents see structured semantic output, not bracket-noise.',
+    color: 'flame',
+    code: `// MCP server tool — returns ASHRU stream
+{
+  name: "extract_facts",
+  description: "Extract kāraka facts as ASHRU/1",
+  inputSchema: { type: "object", properties: { text: { type: "string" }}},
+  handler: async ({ text }) => {
+    const ashru = await llm.extract(text); // returns "ASHRU/1\\nV|..."
+    return { content: [{ type: "text", text: ashru }] };
+  }
+}`,
+  },
+  {
+    name: 'Neo4j · Postgres · pgvector',
     tagline: 'Direct ingest',
     description: 'Each ASHRU row maps to one row in your knowledge graph. No transform layer. No schema migration.',
+    color: 'mint',
     code: `# Each ASHRU verb → one INSERT.
 # kartā → :Subject, karma → :Object,
 # verb_lemma → :REL_TYPE, attributes → JSON properties.
 
 CREATE (s:Entity {name: $karta})
 CREATE (o:Entity {name: $karma})
-CREATE (s)-[r:RELATES {verb: $verb, tense: $tense, ...}]->(o)`,
-    color: 'flame',
+CREATE (s)-[r:RELATES {verb: $verb, tense: $tense}]->(o)`,
   },
   {
-    name: 'Kafka / Kinesis / Pub/Sub',
+    name: 'Cursor · Devin · Continue',
+    tagline: 'Agent memory',
+    description: 'Long-term agent memory store. Each agent action becomes one ashru row. Replay, audit, and retrieve every step a coding agent took without LLM-summarizing every read.',
+    color: 'accent',
+    code: `# Agent emits ashru rows on every action
+agent.on('action', (event) => {
+  const row = \`V|\${event.verb}|\${agent.id}|\${event.target}|||||p|0|file=\${event.file}\`;
+  await kosha.append(row);  // one INSERT, microseconds
+});
+
+# Later: query agent's history with pure SQL
+SELECT * FROM ashrus WHERE karta = 'cursor-agent-42'
+  AND verb_lemma = 'edit' AND adhikarana = 'src/auth.py';`,
+  },
+  {
+    name: 'Kafka · Kinesis · Pub/Sub',
     tagline: 'Semantic streaming',
     description: 'Stream ASHRU rows on a topic. Subscribers filter by verb_lemma or kartā. Multi-agent semantic event bus.',
+    color: 'flame',
     code: `// Producer (any agent emits typed semantic events)
 producer.send('semantic-events',
   'V|update|order_42|paid|||||p|0|amount=99.00');
@@ -52,7 +83,6 @@ producer.send('semantic-events',
 // Consumer subscribes by verb_lemma
 consumer.subscribe('semantic-events').filter(
   row => row.verb_lemma === 'update');`,
-    color: 'mint',
   },
 ];
 const colorClasses = {
@@ -68,7 +98,7 @@ const colorClasses = {
       Drops in next to <span class="gradient-text">every tool you already use.</span>
     </h2>
     <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
-      ASHRU is a wire format, not a framework. It coexists with LangChain, the vendor SDKs, your message bus, your graph database. Change one line of your prompt's output instruction. Replace JSON.parse with ashru.parse. That's it.
+      ASHRU is a wire format, not a framework. It coexists with LangChain, the vendor SDKs, your message bus, your graph database, your MCP servers, your AI coding agents. Change one line of your prompt's output instruction. Replace JSON.parse with ashru.parse. Done.
     </p>
 
     <div class="grid md:grid-cols-2 gap-4">
@@ -80,6 +110,22 @@ const colorClasses = {
           <pre class="code-block !text-[0.72rem] !leading-relaxed overflow-x-auto"><code>{i.code}</code></pre>
         </div>
       ))}
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 mt-10 border-l-4" style="border-left-color: var(--color-flame-500);">
+      <div class="flex items-start gap-4">
+        <div class="text-xl">⚠️</div>
+        <div>
+          <div class="font-semibold text-ink-100 mb-2">Honest trade-off you should know before adopting</div>
+          <p class="text-sm muted leading-relaxed">
+            ASHRU bypasses native JSON-Schema validation. You give up Pydantic, OpenAI Structured Outputs,
+            Anthropic tool-use schema, and Gemini's <code class="text-accent-300">response_schema</code> — your application
+            handles validation. The reference parsers are tolerant by design (skip malformed rows, log warnings),
+            but strict shape enforcement is your responsibility. <strong class="text-ink-100">Token savings come at the cost of native validation libraries.</strong>
+            Worth it for extraction-heavy pipelines at scale; not worth it if every single record must be schema-checked by a framework.
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="mt-10 text-center">
