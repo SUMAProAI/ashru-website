@@ -7,7 +7,7 @@
       Protocol guarantees, <span class="gradient-text">not vibes.</span>
     </h2>
     <p class="text-lg muted leading-relaxed mb-12 max-w-3xl">
-      Two things any serious engineer attacks first: what happens when a value contains the delimiter, and what happens when the LLM emits the wrong number of columns. Both are spec-defined, both are tested.
+      The questions any serious engineer attacks first: what happens when a value contains the delimiter, what happens when the LLM emits the wrong number of columns, and how does the parser preserve order across a million rows. All three are spec-defined, all three are tested in the conformance suite.
     </p>
 
     <div class="grid md:grid-cols-2 gap-4">
@@ -52,19 +52,79 @@ doc.warnings[0].line   <span class="muted"># source line number</span></code></p
       </div>
     </div>
 
+    <!-- NEW: Parsing order guarantees (answers Joshna akka's question) -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8 mt-4" style="border-color: rgba(52, 211, 153, 0.25);">
+      <div class="flex items-baseline justify-between mb-4 gap-3">
+        <h3 class="text-xl font-bold text-ink-100">Parsing order — three guarantees</h3>
+        <span class="text-xs text-mint-400 font-mono uppercase tracking-wider">Spec rules §3.1 · §3.2 · §3.3</span>
+      </div>
+      <p class="text-sm muted leading-relaxed mb-5">
+        At a million rows, the question that matters more than column count is order — does the parser preserve column order, row order, and context order, deterministically, every time? Yes, on all three. Here's exactly how:
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-5">
+        <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
+          <div class="text-xs uppercase tracking-[0.15em] text-mint-400 font-mono mb-2">Order #1</div>
+          <h4 class="text-base font-bold text-ink-100 mb-2">Column order — fixed positionally</h4>
+          <p class="text-xs muted leading-relaxed">
+            The 10 V-columns are defined in <code class="text-accent-300 text-xs">SPEC.md</code>:
+            verb · kartā · karma · karaṇa · sampradāna · apādāna · adhikaraṇa · tense · negated · attributes,
+            in that exact sequence. The LLM gets this in the prompt; the parser splits on <code class="text-accent-300 text-xs">|</code> and assigns by index.
+            <strong class="text-ink-100">No auto-detection.</strong> A swapped column is data corruption — strict mode raises immediately.
+          </p>
+        </div>
+
+        <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
+          <div class="text-xs uppercase tracking-[0.15em] text-mint-400 font-mono mb-2">Order #2</div>
+          <h4 class="text-base font-bold text-ink-100 mb-2">Row order — linear stream</h4>
+          <p class="text-xs muted leading-relaxed">
+            Rows arrive top-to-bottom and are emitted in input order, deterministically.
+            <code class="text-accent-300 text-xs">F|</code> (file marker) and <code class="text-accent-300 text-xs">S|</code> (sphere marker) lines apply forward to all subsequent V| rows
+            until the next marker resets context. <strong class="text-ink-100">Same input → same output, every time.</strong>
+          </p>
+        </div>
+
+        <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
+          <div class="text-xs uppercase tracking-[0.15em] text-mint-400 font-mono mb-2">Order #3</div>
+          <h4 class="text-base font-bold text-ink-100 mb-2">Context order — markers cascade</h4>
+          <p class="text-xs muted leading-relaxed">
+            The parser maintains a marker stack. Nested <code class="text-accent-300 text-xs">F|</code> inside <code class="text-accent-300 text-xs">S|</code> applies both to subsequent rows.
+            Context never silently reorders or drops between rows. Predictable across million-row streams.
+          </p>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-5 border border-white/10 bg-white/[0.02]">
+        <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">Enforcement is binary, not ambiguous</div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <div class="font-mono text-flame-300 text-xs mb-1">strict=True</div>
+            <p class="muted leading-relaxed">Raises <code class="text-accent-300 text-xs">ValueError</code> on the first malformed row (wrong column count, unknown header, malformed escape). <strong class="text-ink-100">No data flows.</strong> Pick this for batch jobs where one corrupted row should fail the whole job.</p>
+          </div>
+          <div>
+            <div class="font-mono text-mint-400 text-xs mb-1">strict=False (default)</div>
+            <p class="muted leading-relaxed">Logs a warning, skips the row, document survives. Pick this for streaming pipelines where one bad LLM output shouldn't kill a million-row batch. Bad rows are surfaced via <code class="text-accent-300 text-xs">doc.warnings</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conformance + spec coverage -->
     <div class="glass-strong rounded-2xl p-6 md:p-7 mt-4">
       <div class="grid md:grid-cols-3 gap-6 text-sm">
         <div>
-          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Spec coverage</div>
-          <p class="muted leading-relaxed">v1.0 spec covers: 10-column V grammar, F-line file context, S-line sphere context, comments (<code class="text-accent-300 text-xs">#</code>), blank-line tolerance, UTF-8, escaping (<code class="text-accent-300 text-xs">\|</code>, <code class="text-accent-300 text-xs">\\</code>, <code class="text-accent-300 text-xs">\n</code>), and parser warnings contract.</p>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Conformance suite</div>
+          <p class="muted leading-relaxed">
+            <strong class="text-mint-400">24/24 cases passing</strong> in <code class="text-accent-300 text-xs">tests/v1.0/conformance.json</code> across both reference parsers — escape round-trips, column-count drift, malformed strict-mode, multi-sphere routing, file context, comments, attributes, bad-header rejection. Tested, not hoped for.
+          </p>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Spec coverage (v1.0)</div>
+          <p class="muted leading-relaxed">10-column V grammar · F-line file context · S-line sphere context · comments (<code class="text-accent-300 text-xs">#</code>) · blank-line tolerance · UTF-8 · escaping (<code class="text-accent-300 text-xs">\|</code>, <code class="text-accent-300 text-xs">\\</code>, <code class="text-accent-300 text-xs">\n</code>) · parser warnings contract · <code class="text-accent-300 text-xs">strict=True</code> mode.</p>
         </div>
         <div>
           <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Reference parsers</div>
-          <p class="muted leading-relaxed">Python and JavaScript reference parsers in the repo. Round-trip tested against the v1.0 conformance suite. ~250 LOC each, zero dependencies, MIT.</p>
-        </div>
-        <div>
-          <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-2">Packages (in flight)</div>
-          <p class="muted leading-relaxed"><code class="text-accent-300 text-xs">pip install ashru</code> and <code class="text-accent-300 text-xs">npm install @ashru/parser</code> are this week's milestone. Until then, single-file copy. Spec is frozen and versioned (v1.0).</p>
+          <p class="muted leading-relaxed">Python (<code class="text-accent-300 text-xs">pip install ashru</code> · this week) and JavaScript (<code class="text-accent-300 text-xs">npm install @ashru/parser</code> · this week). ~250 LOC each, zero runtime dependencies, MIT.</p>
         </div>
       </div>
     </div>

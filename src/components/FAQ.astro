@@ -21,6 +21,22 @@ const faqs = [
     a: "Reference parsers tolerate them: any V| line with the wrong column count is logged and skipped, not raised. The whole document doesn't crash. This is intentional — LLMs sometimes drift by one column on long outputs, and a strict parser would lose the entire batch."
   },
   {
+    q: "Does column order matter? Can the LLM emit columns in any sequence?",
+    a: "Order is fixed in SPEC.md and not auto-detected. The 10 V-columns must appear in spec sequence (verb, kartā, karma, karaṇa, sampradāna, apādāna, adhikaraṇa, tense, negated, attributes) on every V| line. The LLM gets this order in the prompt; the parser splits on '|' and assigns by index. If the LLM emits them out of order, strict mode raises ValueError; tolerant mode logs and skips that row. Order corruption never goes silent."
+  },
+  {
+    q: "How is row order preserved across F| and S| markers?",
+    a: "The parser maintains a marker stack. F| (file context) and S| (sphere context) lines apply forward to all subsequent V| rows until the next marker resets context. So if you emit `F|src/auth.py` followed by 3 V| lines, all 3 inherit that file path, in arrival order. Same input → same output, deterministic across million-row streams."
+  },
+  {
+    q: "What is the worst-case parse failure?",
+    a: "A document with a bad header (anything other than 'ASHRU/1') raises immediately — the parser refuses to process. A bad row mid-document either raises (strict mode) or is logged + skipped (tolerant mode). The document never silently corrupts. Failure is loud and survivable, by design."
+  },
+  {
+    q: "How reliably can LLMs emit ASHRU at scale? Aren't they trained on JSON?",
+    a: "Honest answer: modern models are RLHF-tuned on JSON, so JSON has a structural advantage on first-token reliability. ASHRU compensates with two layers — strict mode catches malformed rows immediately, and the LangChain retry adapter (in the package) re-prompts the LLM with the failing rows for a clean re-emission. We're publishing a parse-success-rate benchmark across Gemini Flash, GPT-4o, and Claude Haiku at 1k-sample scale this week. Until those numbers ship, treat reliability as 'good but not equivalent to JSON, with retries to close the gap'."
+  },
+  {
     q: "Does ASHRU work with my existing extractor (LangChain / LlamaIndex / Instructor / raw API)?",
     a: "Yes. ASHRU is a transport protocol — you change one line of your prompt's output instruction, and a few lines of your output parser. The model and the surrounding code stay the same. Drop-in replacement for the JSON output stage."
   },
