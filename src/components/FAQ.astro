@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: "Why not CSV / TSV / NDJSON?",
-    a: "CSV and TSV are flat — no nested file/sphere context (F| and S| markers). NDJSON gives you one JSON object per line, which is fine but still pays the JSON tax per row. ASHRU drops both the row tax (no braces) and supports nesting via the F|/S| context lines."
+    a: "CSV columns are positional but anonymous — the schema lives in your head. ASHRU columns are positional AND map to fixed kāraka case roles, so every consumer can address `kartā`, `karma`, etc. by name without schema negotiation. NDJSON gives you streaming, but every row still pays the JSON tax (braces, quotes, repeated keys). ASHRU drops the per-row tax."
   },
   {
     q: "What about hallucinated columns / malformed lines?",
@@ -25,8 +25,8 @@ const faqs = [
     a: "Order is fixed in SPEC.md and not auto-detected. The 10 V-columns must appear in spec sequence (verb, kartā, karma, karaṇa, sampradāna, apādāna, adhikaraṇa, tense, negated, attributes) on every V| line. The LLM gets this order in the prompt; the parser splits on '|' and assigns by index. If the LLM emits them out of order, strict mode raises ValueError; tolerant mode logs and skips that row. Order corruption never goes silent."
   },
   {
-    q: "How is row order preserved across F| and S| markers?",
-    a: "The parser maintains a marker stack. F| (file context) and S| (sphere context) lines apply forward to all subsequent V| rows until the next marker resets context. So if you emit `F|src/auth.py` followed by 3 V| lines, all 3 inherit that file path, in arrival order. Same input → same output, deterministic across million-row streams."
+    q: "How is row order preserved in a stream?",
+    a: "Linear stream. V| rows arrive top-to-bottom and are emitted in input order. Same input → same output, deterministic across million-row streams. The parser maintains no hidden state between rows."
   },
   {
     q: "What is the worst-case parse failure?",

@@ -64,7 +64,7 @@ CREATE (s)-[r:RELATES {verb: $verb, tense: $tense}]->(o)`,
     code: `# Agent emits ashru rows on every action
 agent.on('action', (event) => {
   const row = \`V|\${event.verb}|\${agent.id}|\${event.target}|||||p|0|file=\${event.file}\`;
-  await kosha.append(row);  // one INSERT, microseconds
+  await db.insert(row);  // one INSERT, microseconds
 });
 
 # Later: query agent's history with pure SQL

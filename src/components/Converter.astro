@@ -56,9 +56,8 @@
     <div class="flex flex-wrap gap-2 mb-12">
       <span class="text-sm muted self-center mr-2">Try a sample:</span>
       <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="chat">Chat message</button>
-      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="bulk">Bulk file</button>
       <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="negation">Negation + future</button>
-      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="multi">Multi-sphere</button>
+      <button class="sample-btn px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent-500/40 hover:bg-white/5 text-sm transition-colors" data-sample="bulk">Multiple verbs</button>
     </div>
 
     <!-- Beta tester for full LLM extraction — coming soon -->
@@ -94,9 +93,8 @@
 
   const SAMPLES = {
     chat: { json: JSON.stringify({ verbs: [{ verb_lemma: "buy", kartā: "Suman", karma: "Tesla", karaṇa: "$60000", apādāna: "John", adhikaraṇa: "SF", tense: "past", attributes: { date: "2026-05-05" } }] }, null, 2) },
-    bulk: { json: JSON.stringify({ files: [{ path: "src/auth/google.py", verbs: [{ verb_lemma: "validate", kartā: "fn_authenticate", karma: "user_token", tense: "present" }, { verb_lemma: "raise", kartā: "fn_authenticate", karma: "invalid_token", tense: "present", attributes: { on_failure: "true" } }] }, { path: "src/auth/session.py", verbs: [{ verb_lemma: "create", kartā: "fn_login", karma: "session_obj", tense: "present" }] }] }, null, 2) },
     negation: { json: JSON.stringify({ verbs: [{ verb_lemma: "buy", kartā: "Suman", karma: "Tesla", tense: "past", is_negated: true }, { verb_lemma: "buy", kartā: "Suman", karma: "Tesla", karaṇa: "$50000", tense: "conditional", attributes: { condition: "price_drops" } }, { verb_lemma: "deploy", kartā: "engineer", karma: "api", adhikaraṇa: "staging", tense: "future" }] }, null, 2) },
-    multi: { ashru: `ASHRU/1\nS|architect.code-review.error-handling\nV|apply|file_x|exception_handling|||||n|0|\n\nS|sre.incident-response.error-paths\nV|apply|file_x|exception_handling|||||n|0|\n\nS|engineer.refactor-checklist\nV|apply|file_x|exception_handling|||||n|0|` },
+    bulk: { json: JSON.stringify({ verbs: [{ verb_lemma: "validate", kartā: "fn_authenticate", karma: "user_token", tense: "present" }, { verb_lemma: "raise", kartā: "fn_authenticate", karma: "invalid_token", tense: "present", attributes: { on_failure: "true" } }, { verb_lemma: "create", kartā: "fn_login", karma: "session_obj", tense: "present" }] }, null, 2) },
   };
 
   const $j = document.getElementById("json-input");
@@ -129,17 +127,12 @@
   function jsonToAshru(text) {
     const data = JSON.parse(text);
     const lines = ["ASHRU/1"];
-    if (data.files && Array.isArray(data.files)) {
-      for (const f of data.files) {
-        lines.push(`F|${f.path || ""}`);
-        for (const v of (f.verbs || [])) lines.push(verbToAshru(v));
-      }
-    } else if (data.verbs && Array.isArray(data.verbs)) {
+    if (data.verbs && Array.isArray(data.verbs)) {
       for (const v of data.verbs) lines.push(verbToAshru(v));
     } else if (Array.isArray(data)) {
       for (const v of data) lines.push(verbToAshru(v));
     } else {
-      throw new Error("Expected object with 'verbs' or 'files', or a bare array.");
+      throw new Error("Expected object with 'verbs', or a bare array.");
     }
     return lines.join("\n");
   }
@@ -172,14 +165,10 @@
     if (lines[i]?.trim() !== "ASHRU/1") throw new Error("Document must start with ASHRU/1");
     i++;
     const verbs = [];
-    const files = [];
-    let curFile = null, curSphere = null;
     for (; i < lines.length; i++) {
       const line = lines[i];
       const stripped = line.trim();
       if (!stripped || stripped.startsWith("#")) continue;
-      if (line.startsWith("F|")) { curFile = line.slice(2).trim(); files.push(curFile); continue; }
-      if (line.startsWith("S|")) { curSphere = line.slice(2).trim(); continue; }
       if (line.startsWith("V|")) {
         const cols = splitEsc(line);
         if (cols.length !== 11) continue;
@@ -199,8 +188,6 @@
           for (const p of attrs.split(";")) { const eq = p.indexOf("="); if (eq > 0) a[p.slice(0,eq).trim()] = p.slice(eq+1).trim(); }
           if (Object.keys(a).length) obj.attributes = a;
         }
-        if (curFile) obj.file = curFile;
-        if (curSphere) obj.sphere = curSphere;
         verbs.push(obj);
       }
     }

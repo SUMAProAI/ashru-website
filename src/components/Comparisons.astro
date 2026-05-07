@@ -4,7 +4,7 @@ const comparisons = [
   { name: 'Protobuf', verdict: 'LLMs can\'t emit it', reason: 'Binary format. LLMs hallucinate magic numbers and offsets when asked to emit raw bytes. ASHRU is text — what LLMs are actually built to produce.' },
   { name: 'MessagePack', verdict: 'Binary, same problem', reason: 'Same as Protobuf — LLMs are not reliable binary emitters. ASHRU stays text-native and BPE-friendly.' },
   { name: 'YAML', verdict: 'Repeats the keys', reason: 'YAML is human-friendly but every key is still written out per record. At a million records, you pay for `verb_lemma:` a million times.' },
-  { name: 'CSV / TSV', verdict: 'Flat-only', reason: 'CSV is for flat tables. ASHRU supports nested file (`F|`) and contextual sphere (`S|`) markers in a single payload — semantic structure CSV can\'t express.' },
+  { name: 'CSV / TSV', verdict: 'No grammar layer', reason: 'CSV columns are positional but anonymous. ASHRU columns are positional AND map to fixed kāraka case roles — every consumer can address `kartā`, `karma`, etc. by name without schema negotiation.' },
   { name: 'JSON-Schema Structured Outputs', verdict: 'Caches schema, still pays for output', reason: 'OpenAI / Gemini / Claude schema caching reduces SCHEMA-PROMPT cost. They still bill you per generated output token. ASHRU attacks the more expensive side: output.' },
   { name: 'NDJSON / JSONL', verdict: 'Per-row JSON tax', reason: 'Newline-delimited JSON gives you streaming, but every row still pays the JSON tax (braces, quotes, repeated keys). ASHRU drops both.' },
   { name: 'XML', verdict: '🪦', reason: 'Verbose enough that even Java engineers stopped using it for new wire formats around 2010. We will not relitigate this.' },
