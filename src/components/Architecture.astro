@@ -69,7 +69,7 @@
       <div class="glass rounded-xl p-5">
         <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">🧠 Agent memory infrastructure</div>
         <div class="text-sm font-semibold text-ink-100 mb-2">Long-term memory store</div>
-        <p class="text-xs muted leading-relaxed">Each ASHRU row → one row in Postgres + pgvector embedding. Retrieval = cosine similarity × harmonic weight × tense decay. Pay once at write, read forever for free. No per-query LLM cost.</p>
+        <p class="text-xs muted leading-relaxed">Each ASHRU row → one row in Postgres + pgvector embedding. Retrieval pairs cosine similarity with a structural ranking layer (your choice of algorithm). Pay once at write, read forever for free. No per-query LLM cost.</p>
       </div>
       <div class="glass rounded-xl p-5">
         <div class="text-xs uppercase tracking-[0.15em] muted font-semibold mb-3">🔭 AI observability</div>
